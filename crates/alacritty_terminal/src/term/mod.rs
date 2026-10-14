@@ -811,18 +811,18 @@ impl<T> Term<T> {
     where
         T: EventListener,
     {
-        if let Some(remote_session_id) = session_id {
-            if remote_session_id.is_empty() {
-                // fallback for old shell integrations
-                trace!("NewCmd check remote_session_id == \"\"");
-            } else if let Some(local_session_id) = &self.shell_state.local_context.session_id {
-                trace!(
-                    "NewCmd check {remote_session_id} != {local_session_id}: {:?}",
-                    remote_session_id != local_session_id
-                );
-                if remote_session_id != local_session_id {
-                    return;
-                }
+        // NewCmd ignores osc_lock. When preexec did not run (an empty line or ^C), precmd
+        // unlocks and then calls preexec by hand, which locks again before the prompt sends
+        // NewCmd. The session ID check below guards NewCmd instead.
+        if let (Some(remote_session_id), Some(local_session_id)) =
+            (session_id, &self.shell_state.local_context.session_id)
+        {
+            trace!(
+                "NewCmd check {remote_session_id} != {local_session_id}: {:?}",
+                remote_session_id != local_session_id
+            );
+            if remote_session_id != local_session_id {
+                return;
             }
         }
 
@@ -1905,6 +1905,9 @@ impl<T: EventListener> Handler for Term<T> {
 
     #[inline]
     fn username(&mut self, username: &str) {
+        if self.shell_state.osc_lock {
+            return;
+        }
         let username = username.trim().to_owned();
         trace!("Username: {username:?}");
         self.shell_state.get_mut_context().username = Some(username);
@@ -2349,5 +2352,74 @@ mod tests {
 
         assert_eq!(term.history_size(), 15);
         assert_eq!(term.grid.cursor.point, Point::new(Line(4), Column(0)));
+    }
+
+    fn feed(term: &mut Term<VoidListener>, bytes: &[u8]) {
+        let mut parser = ansi::Processor::new();
+        for byte in bytes {
+            parser.advance(term, *byte);
+        }
+    }
+
+    fn osc(body: &str) -> Vec<u8> {
+        format!("\x1b]697;{body}\x07").into_bytes()
+    }
+
+    /// Simulate the shell integration: unlock, show a prompt, then run a command.
+    fn start_command(term: &mut Term<VoidListener>) {
+        feed(term, &osc("OSCUnlock=test-session-123"));
+        feed(term, &osc("NewCmd=test-session-123"));
+        assert!(!term.shell_state.preexec);
+        feed(term, &osc("OSCLock=test-session-123"));
+        feed(term, &osc("PreExec"));
+        assert!(term.shell_state.preexec);
+        assert!(term.shell_state.osc_lock);
+    }
+
+    #[test]
+    fn bare_new_cmd_is_ignored() {
+        let mut term = Term::new_test(SizeInfo::new(10, 5), VoidListener, 0);
+        feed(&mut term, &osc("PreExec"));
+        assert!(term.shell_state.preexec);
+
+        feed(&mut term, &osc("NewCmd"));
+        assert!(term.shell_state.preexec);
+        assert!(term.shell_state.cmd_cursor.is_none());
+    }
+
+    #[test]
+    fn new_cmd_with_wrong_session_is_ignored() {
+        let mut term = Term::new_test(SizeInfo::new(10, 5), VoidListener, 0);
+        feed(&mut term, &osc("PreExec"));
+
+        feed(&mut term, &osc("NewCmd=other-session"));
+        assert!(term.shell_state.preexec);
+        assert!(term.shell_state.cmd_cursor.is_none());
+    }
+
+    #[test]
+    fn username_is_ignored_while_locked() {
+        let mut term = Term::new_test(SizeInfo::new(10, 5), VoidListener, 0);
+        feed(&mut term, &osc("User=alice"));
+        assert_eq!(term.shell_state.get_context().username.as_deref(), Some("alice"));
+
+        start_command(&mut term);
+        feed(&mut term, &osc("User=mallory"));
+        assert_eq!(term.shell_state.get_context().username.as_deref(), Some("alice"));
+    }
+
+    /// precmd after an empty line or ^C: unlock, then the manual preexec locks again
+    /// before the prompt sends NewCmd.
+    #[test]
+    fn new_cmd_after_manual_preexec_ends_preexec() {
+        let mut term = Term::new_test(SizeInfo::new(10, 5), VoidListener, 0);
+        start_command(&mut term);
+
+        feed(&mut term, &osc("OSCUnlock=test-session-123"));
+        feed(&mut term, &osc("OSCLock=test-session-123"));
+        feed(&mut term, &osc("PreExec"));
+        feed(&mut term, &osc("NewCmd=test-session-123"));
+        assert!(!term.shell_state.preexec);
+        assert!(term.shell_state.cmd_cursor.is_some());
     }
 }

@@ -85,11 +85,29 @@ fn working_directory(path: Option<&str>, shell_state: &ShellState) -> PathBuf {
         .unwrap_or_else(|| PathBuf::from("/"))
 }
 
+/// Keep only absolute `PATH` entries. The working directory can come from terminal
+/// output, so relative entries must not resolve against it.
+fn absolute_path_entries(path: &str) -> String {
+    let entries = std::env::split_paths(path).filter(|entry| entry.is_absolute());
+    std::env::join_paths(entries)
+        .ok()
+        .and_then(|joined| joined.into_string().ok())
+        .unwrap_or_default()
+}
+
 fn create_command(executable: impl AsRef<Path>, working_directory: impl AsRef<Path>) -> Command {
     let env = (*SHELL_ENVIRONMENT_VARIABLES.lock().unwrap())
         .clone()
         .into_iter()
         .filter_map(|EnvironmentVariable { key, value }| value.map(|value| (key, value)))
+        // The child and its own children search PATH too, so filter it in the env.
+        .map(|(key, value)| match key.as_str() {
+            "PATH" => {
+                let value = absolute_path_entries(&value);
+                (key, value)
+            },
+            _ => (key, value),
+        })
         .collect::<Vec<_>>();
 
     let mut cmd = if executable.as_ref().is_absolute() {
@@ -546,6 +564,13 @@ pub async fn process_remote_message(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn absolute_path_entries_drops_relative_entries() {
+        let path = absolute_path_entries("/usr/bin:bin:./tools::/opt/bin");
+        let entries: Vec<_> = std::env::split_paths(&path).collect();
+        assert_eq!(entries, vec![PathBuf::from("/usr/bin"), PathBuf::from("/opt/bin")]);
+    }
 
     #[tokio::test]
     async fn test_create_command() {
