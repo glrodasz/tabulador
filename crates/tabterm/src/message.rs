@@ -43,6 +43,10 @@ use tracing::{
 };
 
 use crate::event_handler::EventHandler;
+use crate::inline_suggestion::{
+    INLINE_SUGGESTION,
+    LOOKUP_TIMEOUT,
+};
 use crate::interceptor::KeyInterceptor;
 use crate::pty::AsyncMasterPty;
 use crate::{
@@ -270,6 +274,10 @@ pub async fn process_figterm_request(
                 .ok();
             Ok(None)
         },
+        FigtermRequest::SetInlineSuggestion(request) => {
+            INLINE_SUGGESTION.set(request.buffer, request.suffix);
+            Ok(None)
+        },
         FigtermRequest::InlineShellCompletion(_) => anyhow::bail!("InlineShellCompletion is not supported over remote"),
         FigtermRequest::InlineShellCompletionAccept(_) => {
             anyhow::bail!("InlineShellCompletionAccept is not supported over remote")
@@ -292,10 +300,19 @@ pub async fn process_figterm_message(
     key_interceptor: &mut KeyInterceptor,
 ) -> Result<()> {
     match figterm_request_message.request {
-        // AI inline completions and telemetry are not supported in the standalone build
+        // Answered from the popup's cached suggestion. Spawned so waiting for the popup never blocks the main loop.
+        Some(FigtermRequest::InlineShellCompletion(request)) => {
+            tokio::spawn(async move {
+                let response_message = inline_shell_completion_response(&request.buffer).await;
+                // zsh kills the previous request on each keystroke, so a closed connection is expected
+                if let Err(err) = response_tx.send_async(response_message).await {
+                    debug!(%err, "Failed sending inline shell completion response");
+                }
+            });
+        },
+        // AI inline completion feedback and telemetry are not supported in the standalone build
         Some(
-            FigtermRequest::InlineShellCompletion(_)
-            | FigtermRequest::InlineShellCompletionAccept(_)
+            FigtermRequest::InlineShellCompletionAccept(_)
             | FigtermRequest::InlineShellCompletionSetEnabled(_)
             | FigtermRequest::Telemtety(_),
         ) => {},
@@ -318,6 +335,15 @@ pub async fn process_figterm_message(
     Ok(())
 }
 
+async fn inline_shell_completion_response(buffer: &str) -> FigtermResponseMessage {
+    let insert_text = INLINE_SUGGESTION.lookup(buffer, LOOKUP_TIMEOUT).await;
+    FigtermResponseMessage {
+        response: Some(FigtermResponse::InlineShellCompletion(
+            figterm::InlineShellCompletionResponse { insert_text },
+        )),
+    }
+}
+
 async fn send_figterm_response_hostbound(
     response: Option<FigtermResponse>,
     nonce: Option<u64>,
@@ -331,6 +357,7 @@ async fn send_figterm_response_hostbound(
                 nonce,
                 response: Some(match response {
                     FigtermResponse::Diagnostics(diagnostics) => Response::Diagnostics(diagnostics),
+                    // Inline shell completions are only requested over the local socket
                     FigtermResponse::InlineShellCompletion(_) => unreachable!(),
                 }),
             })),
@@ -415,6 +442,21 @@ pub async fn process_remote_message(
                     send_figterm_response_hostbound(
                         process_figterm_request(
                             FigtermRequest::InsertOnNewCmd(request),
+                            main_loop_tx,
+                            term,
+                            pty_master,
+                            key_interceptor,
+                        )
+                        .await?,
+                        nonce,
+                        &response_tx,
+                    )
+                    .await;
+                },
+                Some(Request::SetInlineSuggestion(request)) => {
+                    send_figterm_response_hostbound(
+                        process_figterm_request(
+                            FigtermRequest::SetInlineSuggestion(request),
                             main_loop_tx,
                             term,
                             pty_master,
@@ -523,5 +565,19 @@ mod tests {
         assert_eq!(output.status.code(), Some(25));
         assert_eq!(output.stdout, b"hello world 2\n");
         assert_eq!(output.stderr, b"hello world 1\n");
+    }
+
+    #[tokio::test]
+    async fn test_inline_shell_completion_response() {
+        INLINE_SUGGESTION.set("message test buffer".into(), "suffix".into());
+        let response = inline_shell_completion_response("message test buffer").await;
+        assert_eq!(
+            response.response,
+            Some(FigtermResponse::InlineShellCompletion(
+                figterm::InlineShellCompletionResponse {
+                    insert_text: Some("suffix".into())
+                }
+            ))
+        );
     }
 }

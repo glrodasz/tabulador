@@ -105,6 +105,10 @@ use tokio::io::AsyncBufReadExt;
 
 use super::app::restart_fig;
 use super::diagnostics::verify_integration;
+use super::init::{
+    INLINE_SOURCE_SETTINGS_KEY,
+    inline_strategy,
+};
 use crate::util::desktop::{
     LaunchArgs,
     desktop_app_running,
@@ -683,53 +687,32 @@ struct InlineCheck;
 #[async_trait]
 impl DoctorCheck for InlineCheck {
     fn name(&self) -> Cow<'static, str> {
-        "Inline".into()
+        "Inline suggestions".into()
     }
 
     async fn get_type(&self, _: &(), _: Platform) -> DoctorCheckType {
         let shell = get_shell_context().await;
-        let inline_enabled = tab_settings::settings::get_bool_or("inline.enabled", true);
-        let is_zsh = matches!(shell, Ok(Some(Shell::Zsh)));
+        let inline_source = tab_settings::settings::get_string_opt(INLINE_SOURCE_SETTINGS_KEY);
+        let inline_enabled = inline_strategy(inline_source.as_deref()).is_some();
 
-        if is_zsh && inline_enabled {
+        if matches!(shell, Ok(Some(Shell::Zsh))) && inline_enabled {
             DoctorCheckType::NormalCheck
-        } else if !is_zsh {
-            DoctorCheckType::NoCheck
         } else {
-            DoctorCheckType::SoftCheck
+            DoctorCheckType::NoCheck
         }
     }
 
     async fn check(&self, _: &()) -> Result<(), DoctorError> {
-        if !tab_settings::settings::get_bool_or("inline.enabled", true) {
+        if tab_os_shim::Env::new().q_using_zsh_autosuggestions() {
             return Err(DoctorError::Warning(
                 format!(
-                    "Inline is disabled, to re-enable run: {}",
-                    format!("{CLI_BINARY_NAME} inline enable").magenta()
+                    "zsh-autosuggestions is loaded; {PRODUCT_NAME} inline suggestions are inactive. To fix either:\n\
+                     - Remove zsh-autosuggestions from {} and restart your terminal\n\
+                     - Set Inline suggestions to off in the dashboard",
+                    "~/.zshrc".bold()
                 )
                 .into(),
             ));
-        }
-
-        if tab_os_shim::Env::new().q_using_zsh_autosuggestions() {
-            return Err(DoctorError::Error {
-                reason: "Using zsh-autosuggestions is not supported at the same time as Inline".into(),
-                info: vec![
-                    "To fix either:".into(),
-                    format!(
-                        "- Remove zsh-autosuggestions from {} and restart your terminal",
-                        "~/.zshrc".bold()
-                    )
-                    .into(),
-                    format!(
-                        "- Disable Inline by running: {}",
-                        format!("{CLI_BINARY_NAME} inline disable").magenta()
-                    )
-                    .into(),
-                ],
-                fix: None,
-                error: None,
-            });
         }
 
         Ok(())

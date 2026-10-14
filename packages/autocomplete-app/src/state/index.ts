@@ -29,12 +29,14 @@ import { GeneratorState } from "../generators/helpers";
 import { getFullHistorySuggestions } from "../history";
 import { createGeneratorState } from "./generators";
 import { createInsertionState } from "./insertion";
+import { sendInlineSuggestion } from "./inlineSuggestion";
 
 const initialState: Partial<AutocompleteState> = {
   figState: initialFigState,
   parserResult: initialParserState,
   generatorStates: [] as GeneratorState[],
   command: null,
+  parsedCommand: null,
 
   visibleState: Visibility.HIDDEN_UNTIL_KEYPRESS,
   lastInsertedSuggestion: null,
@@ -214,6 +216,7 @@ const updateSuggestions =
           (willBeVisible === wasVisible && !suggestionsMayChange)
         ) {
           set(updatedState, replace);
+          sendInlineSuggestion(get());
           return;
         }
 
@@ -252,6 +255,7 @@ const updateSuggestions =
           { ...state, ...update, suggestions, selectedIndex, hasChangedIndex },
           replace,
         );
+        sendInlineSuggestion(get());
       },
       get,
       api,
@@ -375,6 +379,7 @@ export const useAutocompleteStore = createWithEqualityFn<AutocompleteState>(
 
             return {
               parserResult,
+              parsedCommand: state.command,
               visibleState,
               fuzzySearchEnabled: isFuzzySearchEnabled(),
               userFuzzySearchEnabled,
