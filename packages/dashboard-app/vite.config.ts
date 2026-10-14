@@ -1,6 +1,7 @@
-import path from "node:path";
-import { defineConfig, type HtmlTagDescriptor, type Plugin } from "vite";
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { htmlCspPlugin } from "@tab/vite-config/csp";
 
 const csp: Record<string, string> = {
   "default-src": "'self'",
@@ -12,36 +13,9 @@ const csp: Record<string, string> = {
   "frame-src": "'none'",
 };
 
-const cspContent = Object.entries(csp)
-  .map(([k, v]) => `${k} ${v}`)
-  .join("; ");
-
-const htmlCspPlugin: Plugin = {
-  name: "html-csp",
-  transformIndexHtml: {
-    order: "post",
-    handler: (_html, ctx): HtmlTagDescriptor[] => {
-      if (ctx.server?.config?.mode === "development") {
-        return [];
-      }
-
-      return [
-        {
-          injectTo: "head",
-          tag: "meta",
-          attrs: {
-            "http-equiv": "Content-Security-Policy",
-            content: cspContent,
-          },
-        },
-      ];
-    },
-  },
-};
-
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-  plugins: [react(), htmlCspPlugin],
+  plugins: [react(), htmlCspPlugin(csp)],
   server: {
     port: 3433,
   },
@@ -54,8 +28,8 @@ export default defineConfig(({ command }) => ({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@assets": path.resolve(__dirname, "./assets"),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@assets": fileURLToPath(new URL("./assets", import.meta.url)),
     },
   },
 }));
