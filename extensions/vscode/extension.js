@@ -1,6 +1,14 @@
 const vscode = require("vscode");
 const cp = require("child_process");
 
+const SELECTION_DEBOUNCE_MS = 100;
+const OSX_TERMINAL_ENV_SETTING = "terminal.integrated.env.osx";
+const NEW_SESSION_ENV_VALUE = "1";
+
+// Pending debounced selection event. Terminal focus events cancel it, so a late
+// editor-focus event cannot override a newer terminal-focus event.
+let selectionTimer;
+
 let runCommand = function (command) {
   cp.exec(command, (err) => {
     if (err) {
@@ -16,9 +24,18 @@ let config = vscode.workspace.getConfiguration();
 let shouldLog = config.get("q.log") === true;
 
 // Ensure that any VSCode terminal session has TAB_NEW_SESSION set as an environment variable
-let osxEnv = config.get("terminal.integrated.env.osx");
-osxEnv["TAB_NEW_SESSION"] = "1";
-config.update("terminal.integrated.env.osx", osxEnv, true);
+// The setting can be unset, so fall back to an empty object. Read the global value only, so that
+// workspace values are not copied into the global settings. Only write when the value changes.
+let osxEnv = config.inspect(OSX_TERMINAL_ENV_SETTING)?.globalValue ?? {};
+if (osxEnv.TAB_NEW_SESSION !== NEW_SESSION_ENV_VALUE) {
+  config
+    .update(
+      OSX_TERMINAL_ENV_SETTING,
+      { ...osxEnv, TAB_NEW_SESSION: NEW_SESSION_ENV_VALUE },
+      true,
+    )
+    .then(undefined, logError);
+}
 
 function log(...args) {
   if (shouldLog) {
@@ -31,6 +48,7 @@ function logError(message) {
 }
 
 function updateActiveTerminal(terminal) {
+  clearTimeout(selectionTimer);
   let activeTerminal = terminal || vscode.window.activeTerminal;
 
   if (!activeTerminal) {
@@ -75,8 +93,13 @@ function activate() {
       updateActiveTerminal(terminal);
     });
 
+    // Selection changes fire on every cursor move. Debounce them so that we start one `tab`
+    // process per burst instead of one per event.
     vscode.window.onDidChangeTextEditorSelection(() => {
-      runCommand(`tab hook keyboard-focus-changed ${vscode.env.uriScheme} 0`);
+      clearTimeout(selectionTimer);
+      selectionTimer = setTimeout(() => {
+        runCommand(`tab hook keyboard-focus-changed ${vscode.env.uriScheme} 0`);
+      }, SELECTION_DEBOUNCE_MS);
     });
   } catch (e) {
     logError(e);
@@ -84,7 +107,9 @@ function activate() {
 }
 exports.activate = activate;
 
-function deactivate() {}
+function deactivate() {
+  clearTimeout(selectionTimer);
+}
 
 module.exports = {
   activate,
