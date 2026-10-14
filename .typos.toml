@@ -1,5 +1,7 @@
 [files]
+extend-exclude = ["*.png", "*.icns", "*.ico"]
 
 [default.extend-words]
 mmaped = "mmaped"
 caf = "caf" # used in chat tools test
+cpy = "cpy" # variable name in tab_desktop install.rs

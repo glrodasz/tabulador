@@ -1,11 +1,10 @@
 declare global {
   namespace fig {
     /**
-     * [Rust Definition](../../crates/fig_desktop_api/src/init_script.rs)
+     * [Rust Definition](../../crates/tab_desktop_api/src/init_script.rs)
      */
     const constants:
       | {
-          codewhisperer: boolean;
           version: string;
           cli?: string;
           bundlePath?: string;
@@ -26,7 +25,6 @@ declare global {
           macosVersion?: string;
           // TODO: add actual types
           linux?: unknown;
-          midway?: boolean;
         }
       | undefined;
     let settings: Record<string, unknown>;

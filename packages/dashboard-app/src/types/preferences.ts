@@ -1,4 +1,4 @@
-import { Platform } from "@aws/amazon-q-developer-cli-api-bindings";
+import { Platform } from "@tab/api-bindings";
 
 export type PlatformInfo = Awaited<ReturnType<typeof Platform.getPlatformInfo>>;
 
@@ -39,12 +39,7 @@ export type RichText = {
   tag: string;
 };
 
-export type InstallKey =
-  | "dotfiles"
-  | "accessibility"
-  | "inputMethod"
-  | "desktopEntry"
-  | "gnomeExtension";
+export type InstallKey = "dotfiles" | "accessibility" | "inputMethod";
 
 export type InstallCheck = {
   id: string;

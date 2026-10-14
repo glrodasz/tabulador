@@ -2,9 +2,6 @@ import { Routes, Route, Outlet, useNavigate } from "react-router-dom";
 import Help from "./pages/help";
 import SidebarLink from "./components/sidebar/link";
 import Autocomplete from "./pages/terminal/autocomplete";
-import Translate from "./pages/terminal/translate";
-import Chat from "./pages/terminal/chat";
-import Inline from "./pages/terminal/inline";
 import Onboarding from "./pages/onboarding";
 import Preferences from "./pages/settings/preferences";
 import Integrations from "./pages/settings/integrations";
@@ -12,30 +9,23 @@ import Keybindings from "./pages/settings/keybindings";
 import Licenses from "./pages/licenses";
 import { Suspense, useContext, useEffect, useRef } from "react";
 import Modal from "./components/modal";
-import { Telemetry, Event } from "@aws/amazon-q-developer-cli-api-bindings";
+import { Telemetry, Event } from "@tab/api-bindings";
 import InstallModal from "./components/installs/modal";
-import LoginModal from "./components/installs/modal/login";
 import { getIconFromName } from "./lib/icons";
 import { StoreContext } from "./context/zustand";
 import { createStore } from "./lib/store";
 import ListenerContext from "./context/input";
 import { useLocation } from "react-router-dom";
-import {
-  useAccessibilityCheck,
-  useDotfilesCheck,
-  useGnomeExtensionCheck,
-} from "./hooks/store";
+import { useAccessibilityCheck, useDotfilesCheck } from "./hooks/store";
 import { useLocalStateZodDefault } from "./hooks/store/useState";
 import { z } from "zod";
-import { useAuth } from "./hooks/store/useAuth";
 import { NOTIFICATIONS_SEEN_STATE_KEY } from "./lib/constants";
 import WhatsNew from "./pages/whats-new";
 import notificationFeedItems from "../../../feed.json";
 import { useState } from "react";
 import { usePlatformInfo } from "./hooks/store/usePlatformInfo";
-import { Platform } from "@aws/amazon-q-developer-cli-api-bindings";
+import { Platform } from "@tab/api-bindings";
 import { matchesPlatformRestrictions } from "./lib/platform";
-import { gnomeExtensionInstallCheck } from "./data/install";
 
 function App() {
   const store = useRef(createStore()).current;
@@ -60,28 +50,15 @@ function AppLoading() {
 }
 
 function ActiveModal() {
-  const auth = useAuth();
   const [onboardingComplete] = useLocalStateZodDefault(
     "desktop.completedOnboarding",
     z.boolean(),
     false,
   );
-  const [closed, setClosed] = useState(false);
-
-  if (closed) return null;
-
   if (onboardingComplete === false) {
     return (
       <Modal>
         <InstallModal />
-      </Modal>
-    );
-  }
-
-  if (onboardingComplete && auth.authed === false) {
-    return (
-      <Modal>
-        <LoginModal next={() => setClosed(true)} />
       </Modal>
     );
   }
@@ -136,9 +113,6 @@ function Router() {
           <Route path="help" element={<Help />} />
           <Route path="whats-new" element={<WhatsNew />} />
           <Route path="autocomplete" element={<Autocomplete />} />
-          <Route path="translate" element={<Translate />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="inline" element={<Inline />} />
           <Route path="keybindings" element={<Keybindings />} />
           {platformInfo && platformInfo.os === Platform.Os.MACOS && (
             <Route path="integrations" element={<Integrations />} />
@@ -186,21 +160,6 @@ const useNavData = () => {
       link: "/autocomplete",
     },
     {
-      type: "link",
-      name: "Chat",
-      link: "/chat",
-    },
-    {
-      type: "link",
-      name: "Inline",
-      link: "/inline",
-    },
-    {
-      type: "link",
-      name: "Translate",
-      link: "/translate",
-    },
-    {
       type: "header",
       name: "Settings",
     },
@@ -233,21 +192,12 @@ function Layout() {
     z.boolean(),
     false,
   );
-  const platformInfo = usePlatformInfo();
   const [accessibilityCheck] = useAccessibilityCheck();
   const [dotfilesCheck] = useDotfilesCheck();
-  const [gnomeExtensionCheck] = useGnomeExtensionCheck();
   const navData = useNavData();
   const error =
     onboardingComplete &&
-    (accessibilityCheck === false ||
-      dotfilesCheck === false ||
-      (platformInfo &&
-        matchesPlatformRestrictions(
-          platformInfo,
-          gnomeExtensionInstallCheck.platformRestrictions,
-        ) &&
-        gnomeExtensionCheck === false));
+    (accessibilityCheck === false || dotfilesCheck === false);
 
   const [notifCount, _] = useLocalStateZodDefault(
     NOTIFICATIONS_SEEN_STATE_KEY,

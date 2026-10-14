@@ -130,8 +130,12 @@ pub struct SizeInfo {
 }
 
 impl SizeInfo {
+    /// Clamped to the minimum size, since terminals can report 0x0 while a window is being created
     pub fn new(screen_lines: usize, columns: usize) -> SizeInfo {
-        SizeInfo { screen_lines, columns }
+        SizeInfo {
+            screen_lines: max(screen_lines, MIN_SCREEN_LINES),
+            columns: max(columns, MIN_COLUMNS),
+        }
     }
 
     #[inline]
@@ -833,7 +837,7 @@ impl<T> Term<T> {
         trace!("New command cursor: {:?}", self.shell_state.cmd_cursor);
 
         // Add work around for emojis
-        if let Ok(cursor_offset) = fig_os_shim::Env::new().q_prompt_offset_workaround() {
+        if let Ok(cursor_offset) = tab_os_shim::Env::new().q_prompt_offset_workaround() {
             if let Ok(offset) = cursor_offset.parse::<i32>() {
                 self.shell_state.cmd_cursor = self.shell_state.cmd_cursor.map(|cursor| Point {
                     column: Column((cursor.column.0 as i32 - offset).max(0) as usize),
@@ -2123,6 +2127,17 @@ mod tests {
         Column,
         Point,
     };
+
+    #[test]
+    fn size_info_clamps_zero_size() {
+        // Terminals can report 0x0 while a window is being created
+        let size = SizeInfo::new(0, 0);
+        assert_eq!(size.screen_lines, MIN_SCREEN_LINES);
+        assert_eq!(size.columns, MIN_COLUMNS);
+
+        let mut term = Term::new_test(size, VoidListener, 0);
+        term.resize(SizeInfo::new(0, 0));
+    }
 
     #[test]
     fn scroll_display_page_up() {

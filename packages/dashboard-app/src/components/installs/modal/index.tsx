@@ -1,65 +1,41 @@
 import { InstallCheck } from "@/types/preferences";
-import { Fig, Internal } from "@aws/amazon-q-developer-cli-api-bindings";
+import { Fig, Internal } from "@tab/api-bindings";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
-import Lockup from "../../svg/logo";
 import onboarding from "@/data/onboarding";
 import { useStatusCheck } from "@/hooks/store/useStatusCheck";
-import LoginModal from "./login";
 import InstallModal from "./install";
-import { useLocalState, useRefreshLocalState } from "@/hooks/store/useState";
-import migrate_dark from "@assets/images/fig-migration/dark.png?url";
+import { useRefreshLocalState } from "@/hooks/store/useState";
+import appIcon from "@assets/images/icon.png?url";
 import { usePlatformInfo } from "@/hooks/store/usePlatformInfo";
 import { matchesPlatformRestrictions } from "@/lib/platform";
+
+const INSTALL_STEP_IDS = ["dotfiles", "accessibility"];
 
 export default function OnboardingModal() {
   const [step, setStep] = useState(0);
   const check = onboarding[step] as InstallCheck;
-  const [migrationStarted] = useLocalState("desktop.migratedFromFig");
-  const [migrationEnded, setMigrationEnded] = useLocalState(
-    "desktop.migratedFromFig.UiComplete",
-  );
   const [dotfilesCheck, refreshDotfiles] = useStatusCheck("dotfiles");
   const [accessibilityCheck, refreshAccessibility] =
     useStatusCheck("accessibility");
-  const [_desktopEntryCheck, refreshDesktopEntry] =
-    useStatusCheck("desktopEntry");
-  const [_gnomeExtensionCheck, refreshGnomeExtension] =
-    useStatusCheck("gnomeExtension");
   const refreshLocalState = useRefreshLocalState();
   const platformInfo = usePlatformInfo();
 
   const [_dotfiles, setDotfiles] = useState(dotfilesCheck);
   const [_accessibility, setAccessibility] = useState(accessibilityCheck);
 
-  const isMigrating =
-    Boolean(migrationStarted) === true && Boolean(migrationEnded) === false;
-
   useEffect(() => {
     refreshAccessibility();
     refreshDotfiles();
-    refreshDesktopEntry();
-    refreshGnomeExtension();
-  }, [
-    refreshAccessibility,
-    refreshDotfiles,
-    refreshDesktopEntry,
-    refreshGnomeExtension,
-  ]);
+  }, [refreshAccessibility, refreshDotfiles]);
 
   function nextStep() {
-    if (migrationStarted && !migrationEnded) {
-      setMigrationEnded(true);
-    }
-
     setStep(step + 1);
   }
 
   function finish() {
     refreshAccessibility();
     refreshDotfiles();
-    refreshDesktopEntry();
-    refreshGnomeExtension();
     Internal.sendOnboardingRequest({
       action: Fig.OnboardingAction.FINISH_ONBOARDING,
     })
@@ -81,11 +57,16 @@ export default function OnboardingModal() {
       setAccessibility(true);
       setStep(step + 1);
     }
-
-    if (check.id === "desktopEntry" || check.id === "gnomeExtension") {
-      setStep(step + 1);
-    }
   }
+
+  // Past the last step (including skipped platform-restricted steps)
+  const done = step >= onboarding.length;
+  useEffect(() => {
+    if (done) finish();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
+
+  if (done) return null;
 
   if (
     platformInfo &&
@@ -94,47 +75,25 @@ export default function OnboardingModal() {
     setStep(step + 1);
   }
 
-  if (check.id === "welcome" && isMigrating) {
-    return <WelcomeModal figMigration next={nextStep} />;
-  }
-
   if (check.id === "welcome") {
     return <WelcomeModal next={nextStep} />;
   }
 
-  if (
-    ["dotfiles", "accessibility", "gnomeExtension", "desktopEntry"].includes(
-      check.id,
-    )
-  ) {
+  if (INSTALL_STEP_IDS.includes(check.id)) {
     return <InstallModal check={check} skip={skipInstall} next={nextStep} />;
-  }
-
-  if (check.id === "login") {
-    return <LoginModal next={finish} />;
   }
 
   return null;
 }
 
-export function WelcomeModal({
-  next,
-  figMigration,
-}: {
-  next: () => void;
-  figMigration?: boolean;
-}) {
+export function WelcomeModal({ next }: { next: () => void }) {
   return (
     <div className="flex flex-col items-center gap-8 gradient-q-secondary-light -m-10 p-4 pt-10 rounded-lg text-white">
       <div className="flex flex-col items-center gap-8">
-        {figMigration ? (
-          <img src={migrate_dark} className="w-40" />
-        ) : (
-          <Lockup />
-        )}
+        <img src={appIcon} alt="Tab" className="w-24" />
         <div className="flex flex-col gap-2 items-center text-center">
-          <h2 className="text-2xl text-white font-semibold select-none leading-none font-ember tracking-tight">
-            {figMigration ? "Almost done upgrading!" : "Welcome!"}
+          <h2 className="text-2xl text-white font-semibold select-none leading-none font-heading tracking-tight">
+            Welcome!
           </h2>
           <p className="text-sm">Let's get you set up...</p>
         </div>

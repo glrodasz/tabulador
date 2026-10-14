@@ -1,256 +1,148 @@
+# Tab
 
-<p align="center">
-  <a href="https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing.html">
-    <picture>
-      <img src="./.github/media/amazon-q-logo.avif" alt="Amazon Q"
-        width="200px"
-      >
-    </picture>
-  </a>
-</p>
+IDE-style autocomplete for your existing macOS terminal, fully offline.
 
-<h4 align="center">
-  Amazon Q CLI brings IDE-style autocomplete and agentic capabilities to your terminal.
-</h4>
+Tab is a standalone fork of
+[aws/amazon-q-developer-cli-autocomplete](https://github.com/aws/amazon-q-developer-cli-autocomplete)
+(formerly Fig). It keeps only the graphical terminal autocomplete, which Kiro CLI is
+[sunsetting](https://github.com/kirodotdev/Kiro/issues/11728), and removes everything that
+needs an AWS backend:
 
+- No login, telemetry, update checks, chat, translate or AI inline completions.
+  All AWS service clients have been removed, and Tab makes no network requests.
+- Completion specs are built from [withfig/autocomplete](https://github.com/withfig/autocomplete)
+  (MIT) at a pinned commit and bundled into the app, together with their icons.
+- macOS only. You build it yourself and sign it with a local certificate, so no Apple Developer
+  account is needed.
 
-<div align="center">
-  <a href="https://github.com/aws/amazon-q-developer-cli/graphs/commit-activity"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/aws/amazon-q-developer-cli"/></a>
-  <a href="https://github.com/aws/amazon-q-developer-cli/issues"><img alt="GitHub open issues" src="https://img.shields.io/github/issues/aws/amazon-q-developer-cli"/></a>
-</div>
+Tab is not affiliated with or endorsed by Amazon Web Services.
 
+## Requirements
 
-<div align="center">
+- macOS with Xcode command line tools and [Homebrew](https://brew.sh)
+- [rustup](https://rustup.rs). The toolchain is pinned in `rust-toolchain.toml` (Rust 1.88);
+  formatting uses `nightly-2025-11-01`
+- Node 22, Python 3.11, pnpm and protobuf. `scripts/setup.sh` installs them with Homebrew
+  and [mise](https://mise.jdx.dev)
+- The Tauri 1 CLI, which needs an older Rust to build:
 
-[![Rust Test](https://github.com/aws/amazon-q-developer-cli/actions/workflows/rust.yml/badge.svg)](https://github.com/aws/amazon-q-developer-cli/actions/workflows/rust.yml)
-[![Typos Test](https://github.com/aws/amazon-q-developer-cli/actions/workflows/typos.yml/badge.svg)](https://github.com/aws/amazon-q-developer-cli/actions/workflows/typos.yml)
-[![Typescript Test](https://github.com/aws/amazon-q-developer-cli/actions/workflows/typescript.yml/badge.svg)](https://github.com/aws/amazon-q-developer-cli/actions/workflows/typescript.yml)
-</div>
+  ```sh
+  rustup toolchain install 1.79.0
+  cargo +1.79.0 install tauri-cli@1.6.0 --locked
+  ```
 
-<p align="center">
-  <a href="https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing.html">
-    <picture>
-      <img src="./.github/media/amazon-q-cli-features.jpeg" alt="Amazon Q CLI Features"
-      >
-    </picture>
-  </a>
-</p>
+Uninstall or disable Kiro CLI, Amazon Q or Fig first. Their shell hooks conflict with Tab's.
 
-## 😍 Features
--   🔮 [**Auto Completion**](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-autocomplete.html): IDE-style completions to hundreds of popular CLIs like `git`, `npm`, `docker`, and `aws`.
--   💬 [**Natural Language Chat**](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-chat.html): Interact with your terminal using natural language to ask questions, debug issues, or explore the codebase.
--   🧠 [**Contextual Awareness**](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-chat.html#command-line-chat-context-integration): Integrates context from your local development environment, so answers are tailored to your specific code and setup.
--   🤖 [**Agentic Execution**](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-autocomplete.html): Let Amazon Q take action: generate code, edit files, automate Git workflows, resolve merge conflicts, and more — with your permission.
+## Build and install
 
-## ⚡️ Installation
-
-- **macOS**:
-  - **DMG**: [Download now](https://desktop-release.q.us-east-1.amazonaws.com/latest/Amazon%20Q.dmg)
-  - **Homebrew**: `brew install amazon-q`
-- **Linux**:
-  - [Ubuntu/Debian](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing.html#command-line-installing-ubuntu)
-  - [AppImage](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing.html#command-line-installing-appimage)
-  - [Alternative Linux builds](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing.html#command-line-installing-alternative-linux)
-- **Windows**:
-  - Follow the discussions for
-    [Windows](https://github.com/aws/q-command-line-discussions/discussions/15)
-  - Or [use it on Windows with WSL](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing.html#command-line-installing-windows)
-- **Remote machines**
-  - [Autocomplete in SSH](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-autocomplete-ssh.html)
-
-
-## 🚀 Start Contributing
-
-### Prerequisites
-
-- MacOS
-  - Xcode 13 or later
-  - Brew
-
-### 1. Clone repo
-
-```shell
-git clone https://github.com/aws/amazon-q-developer-cli-autocomplete.git
+```sh
+scripts/setup.sh                # once: installs toolchains
+scripts/create-signing-cert.sh  # once: local code signing certificate
+scripts/build-local.sh          # builds and signs build/Tab.app
+scripts/install-local.sh        # installs to /Applications and launches it
 ```
 
-### 2. Setup
-Hassle-free setup:
-```shell
-npm run setup
+On first launch, onboarding installs the shell integrations (a pre and post block in
+`~/.zshrc`, `~/.bashrc` and so on) and asks for **Accessibility** permission in
+System Settings → Privacy & Security → Accessibility. Then open a new terminal window.
+
+`build-local.sh` passes its arguments to the build script, for example
+`scripts/build-local.sh --skip-tests --skip-lints` for a faster rebuild.
+
+### Updating
+
+```sh
+git pull
+scripts/build-local.sh
+scripts/install-local.sh
 ```
 
-Or if you'd like to DIY:
+Use `install-local.sh` rather than copying the app over the installed one: macOS kills a
+signed binary that is modified in place, and the script also refreshes the `tabterm` copies
+in `~/.local/bin`.
 
-<details>
-<summary>Manual Setup</summary>
-<div>
+Accessibility permission is tied to the app's signature. With the local certificate it
+carries over between rebuilds. Without it, the app is ad-hoc signed and you have to remove
+and re-add Tab under Accessibility after each rebuild.
 
-### 1. Install platform dependencies
+## Usage
 
-For Debian/Ubuntu:
+Type a command and Tab suggests subcommands, options and arguments. Default keys:
 
-```shell
-sudo apt update
-sudo apt install build-essential pkg-config jq dpkg curl wget cmake clang libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libdbus-1-dev libwebkit2gtk-4.1-dev libjavascriptcoregtk-4.1-dev valac libibus-1.0-dev libglib2.0-dev sqlite3 libxdo-dev protobuf-compiler
-```
-### 2. Install Rust toolchain using [Rustup](https://rustup.rs):
+| Key | Action |
+| --- | --- |
+| ↑ / ↓ | Move through suggestions |
+| Enter | Insert the selected suggestion |
+| Tab | Insert the common prefix |
+| Esc | Hide the popup |
+| Ctrl+R | Toggle history mode |
 
-```shell
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup default stable
-```
+Change them in `tab dashboard` under Keybindings.
 
-For pre-commit hooks, the following commands are required:
-
-```shell
-rustup toolchain install nightly
-cargo install typos-cli
-```
-
-For MacOS development make sure the right targets are installed:
-
-```shell
-rustup target add x86_64-apple-darwin
-rustup target add aarch64-apple-darwin
+```sh
+tab doctor      # check the installation
+tab settings    # view or change settings
+tab dashboard   # open the settings dashboard
+tab --help-all  # all commands
 ```
 
-### 3. Setup Python and Node using [`mise`](https://mise.jdx.dev)
+### Custom specs
 
-Add mise integrations to your shell:
+Specs in `~/Library/Application Support/tab/autocomplete/specs/` override the bundled ones.
+Use the same layout as the withfig build output: an `index.json` listing the specs, plus
+`<name>.js` files. To bundle newer withfig specs, change `SPECS_COMMIT` in
+`build-scripts/build.py` and rebuild.
 
-For zsh:
-```shell
-echo 'eval "$(mise activate zsh)"' >> "${ZDOTDIR-$HOME}/.zshrc"
+### Troubleshooting
+
+- Run `tab doctor` in a new terminal window. It must run inside a Tab session, so it reports
+  that `tabterm` is not running in terminals opened before installing.
+- No popup: check that Tab is enabled under Accessibility. If it is listed but autocomplete
+  still doesn't work, remove it with **–** and add `/Applications/Tab.app` again.
+- Logs are in `$TMPDIR/tablog` (for example `tab_desktop.log`).
+
+## Uninstall
+
+```sh
+tab uninstall
+security delete-identity -c "Tab Local Code Signing"   # optional: remove the signing certificate
 ```
 
-For bash:
-```shell
-echo 'eval "$(mise activate bash)"' >> ~/.bashrc
+`tab uninstall` removes the app, the shell integrations, the input method and Tab's data in
+`~/Library/Application Support/tab`.
+
+## Development
+
+```sh
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+pnpm install && pnpm test --run && pnpm lint
 ```
 
-For fish:
-```shell
-echo 'mise activate fish | source' >> ~/.config/fish/config.fish
-```
+Pre-commit hooks run rustfmt, clippy, prettier, ruff and typos on staged files. Three Rust
+tests need `fish` and `nu` installed.
 
-Install the Python and Node toolchains using:
+## Project layout
 
-```shell
-mise trust
-mise install
-```
+- [`crates/tab_cli`](crates/tab_cli/): the `tab` CLI
+- [`crates/tabterm`](crates/tabterm/): `tabterm`, the pseudoterminal that reads the terminal
+  edit buffer
+- [`crates/tab_desktop`](crates/tab_desktop/): the desktop app
+  ([`tao`](https://docs.rs/tao/latest/tao/)/[`wry`](https://docs.rs/wry/latest/wry/)) that
+  shows the autocomplete window
+- [`crates/tab_input_method`](crates/tab_input_method/): the input method that gets the cursor
+  position
+- [`crates/tab_integrations`](crates/tab_integrations/): shell, SSH, input method and VS Code
+  integrations
+- [`packages/autocomplete-app`](packages/autocomplete-app/): the autocomplete React app
+- [`packages/dashboard-app`](packages/dashboard-app/): the settings dashboard
+- [`build-scripts/`](build-scripts/): Python build scripts
+- [`proto/`](proto/): protocol buffer messages for IPC
+- [`tests/`](tests/): integration tests
 
-### 4. Setup precommit hooks
+## Licensing
 
-Run `pnpm` in root directory to add pre-commit hooks:
+Dual licensed under [MIT](LICENSE.MIT) and [Apache 2.0](LICENSE.APACHE), the same as
+the original project. The changes from upstream are in this repository's git history.
 
-```shell
-pnpm install --ignore-scripts
-```
-
-</div>
-</details>
-
-
-### 3. Start Local Development
-To compile and view changes made to `q chat`:
-```shell
-cargo run --bin q_cli
-```
-
-> If you are working on other q commands, just append `-- <command name>`. For example, to run `q login`, you can run `cargo run --bin q_cli -- login`
-
-To run tests for the Q CLI crate:
-```shell
-cargo test -p q_cli
-```
-
-To format Rust files:
-```shell
-cargo +nightly fmt
-```
-
-To run clippy:
-```shell
-cargo clippy --locked --workspace --color always -- -D warnings
-```
-
-
-
-### 💡 Quick Tip for Onboarding
-
-Use Q CLI to help you onboard Q CLI! 
-
-Start a `q chat` session:
-
-```shell
-q chat
-```
-
-Once inside `q chat`, you can supply project context by adding the [`codebase-summary.md`](codebase-summary.md) file:
-
-```shell
-/context add codebase-summary.md
-```
-
-This enables Q to answer onboarding questions like:
-
-- “What does this crate do?”
-
-- “Where is X implemented?”
-
-- “How do these components interact?”
-
-Great for speeding up your ramp-up and navigating the repo more effectively.
-
-
-
-
-## 🏗️ Project Layout
-
-Several projects live here:
-
-- [`autocomplete`](packages/autocomplete/) - The autocomplete react app
-- [`dashboard`](packages/dashboard-app/) - The dashboard react app
-- [`figterm`](crates/figterm/) - figterm, our headless terminal/pseudoterminal that
-  intercepts the user’s terminal edit buffer.
-- [`q_cli`](crates/q_cli/) - the `q` CLI, allows users to interface with Amazon Q Developer from
-  the command line
-- [`fig_desktop`](crates/fig_desktop/) - the Rust desktop app, uses
-  [`tao`](https://docs.rs/tao/latest/tao/)/[`wry`](https://docs.rs/wry/latest/wry/)
-  for windowing/webviews
-- [`fig_input_method`](crates/fig_input_method/) - The input method used to get cursor
-  position on macOS
-- [`vscode`](extensions/vscode/) - Contains the VSCode plugin needed
-  for the Amazon Q Developer for command line to work in VSCode
-- [`jetbrains`](extensions/jetbrains/) - Contains the VSCode plugin
-  needed for the Amazon Q Developer for command line to work in Jetbrains IDEs
-
-Other folder to be aware of
-
-- [`build-scripts/`](build-scripts/) - Contains all python scripts to build,
-  sign, and test the project on macOS and Linux
-- [`crates/`](crates/) - Contains all internal rust crates
-- [`packages/`](packages/) - Contains all internal npm packages
-- [`proto/`](proto/) -
-  [protocol buffer](https://developers.google.com/protocol-buffers/) message
-  specification for inter-process communication
-- [`tests/`](tests/) - Contain integration tests for the projects
-
-Below is a high level architecture of how the different components of the app and
-their IPC:
-
-![architecture](docs/assets/architecture.svg)
-
-
-
-
-## 🛡️ Security
-
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
-
-## 📜 Licensing
-
-This repo is dual licensed under MIT and Apache 2.0 licenses.
-
-“Amazon Web Services” and all related marks, including logos, graphic designs, and service names, are trademarks or trade dress of AWS in the U.S. and other countries. AWS’s trademarks and trade dress may not be used in connection with any product or service that is not AWS’s, in any manner that is likely to cause confusion among customers, or in any manner that disparages or discredits AWS.
+"Amazon Web Services", "Amazon Q" and related marks are trademarks of AWS.
