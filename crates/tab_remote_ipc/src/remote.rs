@@ -126,7 +126,10 @@ pub async fn handle_remote_ipc(
             }
             message = reader.recv_message::<Hostbound>() => match message {
                 Ok(Some(message)) => {
-                    trace!(?message, "Received remote message");
+                    // The handshake carries the client secret, so do not log it
+                    if !matches!(message.packet, Some(hostbound::Packet::Handshake(_))) {
+                        trace!(?message, "Received remote message");
+                    }
                     if let Some(response) = match message.packet {
                         Some(hostbound::Packet::Handshake(handshake)) => {
                             let result = if initialized {
@@ -134,37 +137,13 @@ pub async fn handle_remote_ipc(
                                 Some(clientbound::Packet::HandshakeResponse(HandshakeResponse {
                                     success: false,
                                 }))
-                            } else if let Some(success) = figterm_state.with_update(session_id, |session| {
-                                if session.secret == handshake.secret {
-                                    initialized = true;
-                                    session.writer = Some(clientbound_tx.clone());
-                                    session.dead_since = None;
-                                    session.on_close_tx = on_close_tx.clone();
-                                    debug!(
-                                        "Client auth for {} accepted because of secret match ({} = {})",
-                                        handshake.id, session.secret, handshake.secret
-                                    );
-                                    true
-                                } else {
-                                    debug!(
-                                        "Client auth for {} rejected because of secret mismatch ({} =/= {})",
-                                        handshake.id, session.secret, handshake.secret
-                                    );
-                                    false
-                                }
-                            }) {
-                                Some(clientbound::Packet::HandshakeResponse(HandshakeResponse { success }))
                             } else {
                                 initialized = true;
                                 let (command_tx, command_rx) = flume::unbounded();
                                 tokio::spawn(handle_commands(command_rx, figterm_state.clone(), session_id));
-                                debug!(
-                                    "Client auth for {} accepted because of new id with secret {}",
-                                    handshake.id, handshake.secret
-                                );
+                                debug!("Client auth for {} accepted", handshake.id);
                                 figterm_state.insert(FigtermSession {
                                     id: session_id,
-                                    secret: handshake.secret.clone(),
                                     sender: command_tx,
                                     writer: Some(clientbound_tx.clone()),
                                     dead_since: None,

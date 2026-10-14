@@ -52,7 +52,7 @@ pub async fn write_file(request: WriteFileRequest, env: &Env, fs: &Fs) -> Reques
     use tab_proto::fig::write_file_request::Data;
     let path = request.path.as_ref().ok_or_else(|| "No path provided".to_string())?;
     let resolved_path = resolve_filepath(path, env);
-    match request.data.unwrap() {
+    match request.data.ok_or("No data provided")? {
         Data::Binary(data) => fs
             .write(&*resolved_path, data)
             .await
@@ -70,13 +70,14 @@ pub async fn append_to_file(request: AppendToFileRequest, env: &Env) -> RequestR
     use tab_proto::fig::append_to_file_request::Data;
     let path = request.path.as_ref().ok_or_else(|| "No path provided".to_string())?;
     let resolved_path = resolve_filepath(path, env);
+    let data = request.data.ok_or("No data provided")?;
     let mut file = OpenOptions::new()
         .append(true)
         .open(&*resolved_path)
         .await
         .map_err(|err| format!("Failed opening file at {resolved_path}: {err}"))?;
 
-    match request.data.unwrap() {
+    match data {
         Data::Binary(data) => file
             .write(&data)
             .await
@@ -229,5 +230,39 @@ mod tests {
 
         let read_content = fs.read(&path).await.unwrap();
         assert_eq!(content.as_bytes(), &read_content[..]);
+    }
+
+    #[tokio::test]
+    async fn test_write_file_without_data() {
+        let fs = Fs::new_fake();
+        let env = Env::new();
+
+        let request = WriteFileRequest {
+            path: Some(FilePath {
+                path: "/test.txt".into(),
+                relative_to: None,
+                expand_tilde_in_path: None,
+            }),
+            data: None,
+        };
+
+        let err = write_file(request, &env, &fs).await.unwrap_err();
+        assert_eq!(err.to_string(), "No data provided");
+    }
+
+    #[tokio::test]
+    async fn test_append_to_file_without_data() {
+        // The data check runs before the file is opened, so the path does not need to exist
+        let request = AppendToFileRequest {
+            path: Some(FilePath {
+                path: "/nonexistent/tab_desktop_api_append.txt".into(),
+                relative_to: None,
+                expand_tilde_in_path: None,
+            }),
+            data: None,
+        };
+
+        let err = append_to_file(request, &Env::new()).await.unwrap_err();
+        assert_eq!(err.to_string(), "No data provided");
     }
 }

@@ -45,8 +45,9 @@ use tracing::{
 const INPUT_CONTROLLER_CLASS_NAME: &str = env!("InputMethodServerControllerClass");
 
 fn bundle_identifier(client: &AnyObject) -> Option<String> {
-    let bundle_id: &NSString = unsafe { msg_send![client, bundleIdentifier] };
-    Some(bundle_id.to_string())
+    // `bundleIdentifier` can return nil, so it must be read as `Option`.
+    let bundle_id: Option<&NSString> = unsafe { msg_send![client, bundleIdentifier] };
+    bundle_id.map(|id| id.to_string())
 }
 
 struct Ivars {
@@ -90,8 +91,11 @@ declare_class!(
 
         #[method(activateServer:)]
         fn activate_server(&self, client: Option<&AnyObject>) {
-            let client = client.unwrap();
             self.ivars().is_active.set(true);
+            let Some(client) = client else {
+                warn!("activated server without a client");
+                return;
+            };
 
             let bundle_id = bundle_identifier(client);
             info!("activated server: {:?}", bundle_id);
@@ -119,12 +123,17 @@ declare_class!(
         #[method(deactivateServer:)]
         fn deactivate_server(&self, client: Option<&AnyObject>) {
             self.ivars().is_active.set(false);
-            info!("deactivated server: {:?}", bundle_identifier(client.unwrap()));
+            info!("deactivated server: {:?}", client.and_then(bundle_identifier));
         }
 
         #[method(handleCursorPositionRequest:)]
         fn handle_cursor_position_request(&self, _notif: Option<&AnyObject>) {
-            let client: &AnyObject = unsafe { msg_send![self, client] };
+            // `client` can return nil, so it must be read as `Option`.
+            let client: Option<&AnyObject> = unsafe { msg_send![self, client] };
+            let Some(client) = client else {
+                debug!("No client for cursor position request, ignoring request");
+                return;
+            };
             let bundle_id = bundle_identifier(client);
 
             let is_active = self.ivars().is_active.get();
@@ -140,7 +149,8 @@ declare_class!(
                                 width: 0.0,
                             },
                         };
-                        let _: () = unsafe { msg_send![client, attributesForCharacterIndex: 0 lineHeightRectangle: &mut rect] };
+                        // `attributesForCharacterIndex:lineHeightRectangle:` returns a nullable `NSDictionary`
+                        let _: Option<&AnyObject> = unsafe { msg_send![client, attributesForCharacterIndex: 0 lineHeightRectangle: &mut rect] };
 
                         let hook = new_caret_position_hook(
                             rect.origin.x,
