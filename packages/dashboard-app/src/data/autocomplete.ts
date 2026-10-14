@@ -95,10 +95,10 @@ const autocompleteSettings: PrefSection[] = [
         id: "autocomplete.loadRepoLocalSpecs",
         title: "Load completion specs from project folders",
         description:
-          "Load completion specs from `.fig/autocomplete/build` in the current folder and its parent folders. These specs can run commands. Turn this on only if you trust the projects you open.",
+          "Load completion specs from `.fig/autocomplete/build` in the current folder and its parent folders. These specs can run commands. Turn this off if you open projects that you do not trust.",
         example: "e.g. `./configure` or `?`",
         type: "boolean",
-        default: false,
+        default: true,
         popular: false,
       },
       {
@@ -168,7 +168,7 @@ const autocompleteSettings: PrefSection[] = [
         description:
           "Grey suggestions on the command line from history and/or completion specs. zsh only. Applies to new terminal windows. Press → to accept.",
         type: "select",
-        default: "off",
+        default: "history-specs",
         options: ["off", "history", "specs", "history-specs"],
         popular: false,
       },
