@@ -25,8 +25,8 @@ export function useInputMethodCheck() {
   const store = useContext(StoreContext);
   if (!store) throw new Error("Missing StoreContext.Provider in the tree");
   return [
-    useStore(store, (state) => state.accessibilityIsInstalled),
-    useStore(store, (state) => state.refreshAccessibilityIsInstalled),
+    useStore(store, (state) => state.inputMethodIsInstalled),
+    useStore(store, (state) => state.refreshInputMethodIsInstalled),
   ] as const;
 }
 

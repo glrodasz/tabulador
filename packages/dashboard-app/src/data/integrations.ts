@@ -37,6 +37,15 @@ const integrationOptions = [
         default: false,
         inverted: true,
       },
+      {
+        id: "integrations.ghostty.disabled",
+        title: "Ghostty",
+        description: `Add ${PRODUCT_NAME} to Ghostty`,
+        type: "boolean",
+        default: false,
+        inverted: true,
+        installKey: "inputMethod" as const,
+      },
     ],
   },
   // {
