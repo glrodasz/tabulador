@@ -17,7 +17,8 @@ NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 export PATH="$HOME/.cargo/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims:$HOME/.local/share/mise/shims:$PATH"
 
 use_pyenv=0; command -v pyenv >/dev/null 2>&1 && use_pyenv=1
-use_nvm=0; [ -s "$NVM_DIR/nvm.sh" ] && use_nvm=1
+# nvm only works in bash and zsh, so fish users get Node from mise
+use_nvm=0; [ -s "$NVM_DIR/nvm.sh" ] && [ "$(basename "$SHELL")" != fish ] && use_nvm=1
 # mise is only needed for the runtimes pyenv and nvm don't provide
 use_mise=$((!use_pyenv || !use_nvm))
 
