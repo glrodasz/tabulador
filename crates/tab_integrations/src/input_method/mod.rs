@@ -262,6 +262,7 @@ impl std::fmt::Debug for TISInputSource {
 }
 
 const INPUT_SOURCE_LOOKUP_ATTEMPTS: u32 = 20;
+const FINISH_INSTALLATION_ATTEMPTS: u32 = 180;
 const INPUT_SOURCE_LOOKUP_INTERVAL: std::time::Duration = std::time::Duration::from_millis(500);
 
 impl std::default::Default for InputMethod {
@@ -578,6 +579,8 @@ impl Integration for InputMethod {
             .join(BUNDLE_CONTENTS_MACOS_PATH)
             .join(CLI_BINARY_NAME);
 
+        // Give the user time to add the input method in Keyboard settings, but don't wait forever
+        let mut finish_attempts = 0;
         loop {
             let out = tokio::process::Command::new(&q_cli_path)
                 .args(["_", "attempt-to-finish-input-method-installation"])
@@ -591,9 +594,15 @@ impl Integration for InputMethod {
                 break;
             } else {
                 let err = String::from_utf8_lossy(&out.stdout);
-                match serde_json::from_str::<InputMethodError>(&err).ok() {
+                let error = serde_json::from_str::<InputMethodError>(&err).ok();
+                match &error {
                     Some(error) => debug!("{error}"),
                     None => debug!("Could not parse output as known error: {err}"),
+                }
+
+                finish_attempts += 1;
+                if finish_attempts >= FINISH_INSTALLATION_ATTEMPTS {
+                    return Err(error.unwrap_or(InputMethodError::NotEnabled).into());
                 }
             }
 
