@@ -261,6 +261,9 @@ impl std::fmt::Debug for TISInputSource {
     }
 }
 
+const INPUT_SOURCE_LOOKUP_ATTEMPTS: u32 = 20;
+const INPUT_SOURCE_LOOKUP_INTERVAL: std::time::Duration = std::time::Duration::from_millis(500);
+
 impl std::default::Default for InputMethod {
     fn default() -> Self {
         let fig_app_path = tab_util::app_bundle_path();
@@ -539,11 +542,31 @@ impl Integration for InputMethod {
                 Err(err) => warn!("Could not launch input method: {err}"),
             }
 
-            run_on_main(|| {
-                let source = self.input_source()?;
-                source.enable()?;
-                Ok::<(), InputMethodError>(())
-            })?;
+            // A newly registered input source can take a moment to show up, especially in a
+            // long running process like the desktop app, so retry before giving up.
+            let mut attempts = 0;
+            loop {
+                let enabled = run_on_main(|| {
+                    let source = self.input_source()?;
+                    source.enable()?;
+                    Ok::<(), InputMethodError>(())
+                });
+                match enabled {
+                    Ok(()) => break,
+                    Err(
+                        err @ (InputMethodError::CouldNotListInputSources
+                        | InputMethodError::NoInputSourcesForBundleIdentifier { .. }),
+                    ) => {
+                        attempts += 1;
+                        if attempts >= INPUT_SOURCE_LOOKUP_ATTEMPTS {
+                            return Err(err.into());
+                        }
+                        debug!("Input source not found yet, retrying: {err}");
+                        tokio::time::sleep(INPUT_SOURCE_LOOKUP_INTERVAL).await;
+                    },
+                    Err(err) => return Err(err.into()),
+                }
+            }
 
             // The 'enabled' property of an input source is never updated for the process that
             // invokes `TISEnableInputSource` Unclear why this is, but we handle it by
