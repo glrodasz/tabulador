@@ -19,24 +19,22 @@ Tab is not affiliated with or endorsed by Amazon Web Services.
 
 ## Requirements
 
-- macOS with Xcode command line tools and [Homebrew](https://brew.sh)
-- [rustup](https://rustup.rs). The toolchain is pinned in `rust-toolchain.toml` (Rust 1.88);
-  formatting uses `nightly-2025-11-01`
-- Node 22, Python 3.11, pnpm and protobuf. `scripts/setup.sh` installs them with Homebrew
-  and [mise](https://mise.jdx.dev)
-- The Tauri 1 CLI, which needs an older Rust to build:
+- macOS with [Homebrew](https://brew.sh). Everything else is installed by `make setup`:
+  - Xcode command line tools
+  - rustup, the pinned toolchain from `rust-toolchain.toml` (Rust 1.88) and `nightly-2025-11-01`
+    for formatting
+  - Node 22 and Python 3.11 with [mise](https://mise.jdx.dev), plus pnpm and protobuf
+  - The Tauri 1 CLI, built with Rust 1.79
 
-  ```sh
-  rustup toolchain install 1.79.0
-  cargo +1.79.0 install tauri-cli@1.6.0 --locked
-  ```
+  `make setup` skips anything already installed, so it is safe to re-run. `make check` shows
+  what is still missing.
 
 Uninstall or disable Kiro CLI, Amazon Q or Fig first. Their shell hooks conflict with Tab's.
 
 ## Build and install
 
 ```sh
-make setup     # once: installs toolchains
+make setup     # once: installs missing prerequisites
 make cert      # once: local code signing certificate
 make install   # checks prerequisites, builds and signs build/Tab.app, installs it to /Applications
 make run       # launches Tab
