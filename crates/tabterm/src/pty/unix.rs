@@ -247,9 +247,12 @@ impl AsyncMasterPty for UnixAsyncMasterPty {
 
 impl MasterPty for UnixMasterPty {
     fn get_async_master_pty(self: Box<Self>) -> Result<Box<dyn AsyncMasterPty + Send + Sync>> {
-        Ok(Box::new(UnixAsyncMasterPty {
-            fd: AsyncFd::new(self.fd).context("Failed to create AsyncFd")?,
-        }))
+        // SAFETY: PtyMaster owns its fd (an OwnedFd) and only closes it when dropped, which happens
+        // after the AsyncFd that owns it deregisters it
+        let fd = unsafe { AsyncFd::register(self.fd) }
+            .map_err(|err| err.into_parts().1)
+            .context("Failed to create AsyncFd")?;
+        Ok(Box::new(UnixAsyncMasterPty { fd }))
     }
 }
 
