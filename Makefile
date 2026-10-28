@@ -6,6 +6,10 @@ CLI         := $(INSTALLED)/Contents/MacOS/tab
 CERT_NAME   := Tab Local Code Signing
 TOOLS       := cargo rustup pnpm protoc cargo-tauri python3.11
 
+# Find tools that make setup just installed, before the shell config is reloaded
+PYENV_ROOT  ?= $(HOME)/.pyenv
+export PATH := $(HOME)/.cargo/bin:$(PYENV_ROOT)/shims:$(HOME)/.local/share/mise/shims:$(PATH)
+
 # make build FAST=1 skips tests and lints; ARGS passes anything else to build-scripts/main.py
 ARGS ?=
 ifdef FAST
@@ -23,12 +27,9 @@ help: ## Show this help
 	@echo "First time:     make setup cert install run"
 	@echo "Faster rebuild: make install FAST=1"
 
-setup: ## Install toolchains (Homebrew, mise, Rust, Tauri CLI) and pnpm deps
+setup: ## Install missing prerequisites (Rust, protoc, Python 3.11, Node, Tauri CLI); safe to re-run
 	scripts/setup.sh
-	@export PATH="$$HOME/.cargo/bin:$$PATH"; \
-	command -v cargo-tauri >/dev/null 2>&1 || { \
-		rustup toolchain install 1.79.0 && \
-		cargo +1.79.0 install tauri-cli@1.6.0 --locked; }
+	@$(MAKE) --no-print-directory check
 
 cert: ## Create the local signing certificate (keeps Accessibility across rebuilds)
 	scripts/create-signing-cert.sh
