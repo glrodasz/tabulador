@@ -2,7 +2,13 @@
 
 IDE-style autocomplete for your existing macOS terminal, fully offline.
 
-Tab is a standalone fork of
+> **This is a personal fork.** [glrodasz/tabulador](https://github.com/glrodasz/tabulador) is
+> Guillermo Rodas's own version of [kayluhb/tab](https://github.com/kayluhb/tab) by Caleb Brown.
+> It adds a Makefile-based setup and other developer-experience changes, and it no longer syncs
+> with upstream. Credit for Tab goes to Caleb Brown, and for the original autocomplete to AWS and
+> the Fig team. The licenses and [NOTICE](NOTICE) are unchanged.
+
+Tab itself is a standalone fork of
 [aws/amazon-q-developer-cli-autocomplete](https://github.com/aws/amazon-q-developer-cli-autocomplete)
 (formerly Fig). It keeps only the graphical terminal autocomplete, which Kiro CLI is
 [sunsetting](https://github.com/kirodotdev/Kiro/issues/11728), and removes everything that
@@ -34,24 +40,46 @@ Tab is not affiliated with or endorsed by Amazon Web Services.
 
 Uninstall or disable Kiro CLI, Amazon Q or Fig first. Their shell hooks conflict with Tab's.
 
-## Build and install
+## Quick start
+
+On a Mac with [Homebrew](https://brew.sh):
 
 ```sh
-make setup     # once: installs missing prerequisites
-make cert      # once: local code signing certificate
-make install   # checks prerequisites, builds and signs build/Tab.app, installs it to /Applications
-make run       # launches Tab
+make setup     # 1. install missing prerequisites (safe to re-run)
+make check     # 2. confirm everything is in place
+make cert      # 3. once per Mac: signing certificate, keeps Accessibility across rebuilds
+make install   # 4. build, sign and install Tab to /Applications
+make run       # 5. launch Tab
 ```
 
-Run `make` on its own to list every target, such as `make check`, `make test` and
-`make uninstall`. The `scripts/` they call still work on their own.
+`make setup` adds Cargo and, if it is used, mise to your shell config (`~/.zshrc`,
+`~/.bashrc` or `config.fish`). `make install` also runs the tests and lints, which takes a while.
+`make install FAST=1` skips them.
 
 On first launch, onboarding installs the shell integrations (a pre and post block in
 `~/.zshrc`, `~/.bashrc` and so on) and asks for **Accessibility** permission in
 System Settings → Privacy & Security → Accessibility. Then open a new terminal window.
 
-`make install FAST=1` skips tests and lints for a faster rebuild. `ARGS` passes anything else
-to the build script, for example `make build ARGS="--variant minimal"`.
+### Make targets
+
+Run `make` to list them all.
+
+| Target | What it does |
+| --- | --- |
+| `make setup` | Install missing prerequisites |
+| `make check` | List missing tools, the signing certificate and conflicting apps |
+| `make cert` | Create the local signing certificate |
+| `make build` | Build and sign `build/Tab.app` |
+| `make install` | Build, quit a running Tab and install to `/Applications` |
+| `make run` | Launch the installed app |
+| `make update` | `git pull`, then install and relaunch |
+| `make test` / `make lint` | Rust and TypeScript tests / clippy and linters |
+| `make clean` / `make distclean` | Remove `build/` / also `target/`, `.venv` and `node_modules` |
+| `make uninstall` | Remove the app, shell integrations and Tab's data |
+
+`FAST=1` skips tests and lints on `build` and `install`. `ARGS` passes anything else to the
+build script, for example `make build ARGS="--variant minimal"`. The `scripts/` that the
+targets call also work on their own.
 
 ### Updating
 
@@ -127,7 +155,7 @@ make lint   # cargo clippy, pnpm lint
 ```
 
 Pre-commit hooks run rustfmt, clippy, prettier, ruff and typos on staged files. Three Rust
-tests need `fish` and `nu` installed.
+tests need `fish` and `nu`, which `make setup` installs.
 
 ## Project layout
 
