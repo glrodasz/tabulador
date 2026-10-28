@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install everything needed to build Tab on macOS. Safe to re-run: steps
+# Install everything needed to build Tabulador on macOS. Safe to re-run: steps
 # whose tools are already present are skipped.
 
 set -euo pipefail

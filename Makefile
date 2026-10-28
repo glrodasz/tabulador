@@ -1,4 +1,4 @@
-APP_NAME    := Tab
+APP_NAME    := Tabulador
 APP         := build/$(APP_NAME).app
 INSTALL_DIR := /Applications
 INSTALLED   := $(INSTALL_DIR)/$(APP_NAME).app
@@ -23,7 +23,7 @@ endif
 .PHONY: help setup cert check build install run update test lint clean distclean uninstall
 
 help: ## Show this help
-	@echo "Tab targets:"
+	@echo "Tabulador targets:"
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
 	@echo
 	@echo "First time:     make setup cert install run"
@@ -53,10 +53,10 @@ check: ## Check prerequisites, signing certificate and conflicting apps
 	done; \
 	[ $$ok = 1 ] || { echo; echo "Fix the above (make setup installs missing tools)"; exit 1; }
 
-build: check ## Build and sign build/Tab.app (FAST=1 skips tests and lints)
+build: check ## Build and sign build/Tabulador.app (FAST=1 skips tests and lints)
 	scripts/build-local.sh $(ARGS)
 
-install: build ## Build, then install into /Applications (quits a running Tab first)
+install: build ## Build, then install into /Applications (quits a running Tabulador first)
 	scripts/install-local.sh --no-open
 	@echo "Next: make run"
 
@@ -82,7 +82,7 @@ clean: ## Remove build/ (keeps the Cargo cache in target/)
 distclean: clean ## Also remove target/, .venv and node_modules
 	rm -rf target .venv node_modules
 
-uninstall: ## Remove the app, shell integrations and Tab data
+uninstall: ## Remove the app, shell integrations and Tabulador data
 	@[ -x "$(CLI)" ] || { echo "$(INSTALLED) is not installed" >&2; exit 1; }
 	"$(CLI)" uninstall
 	@echo "Optional: security delete-identity -c \"$(CERT_NAME)\""

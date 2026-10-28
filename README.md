@@ -1,21 +1,21 @@
-# Tab
+# Tabulador
 
 IDE-style autocomplete for your existing macOS terminal, fully offline.
 
-Tab is a standalone fork of
+Tabulador is a standalone fork of
 [aws/amazon-q-developer-cli-autocomplete](https://github.com/aws/amazon-q-developer-cli-autocomplete)
 (formerly Fig). It keeps only the graphical terminal autocomplete, which Kiro CLI is
 [sunsetting](https://github.com/kirodotdev/Kiro/issues/11728), and removes everything that
 needs an AWS backend:
 
 - No login, telemetry, update checks, chat, translate or AI inline completions.
-  All AWS service clients have been removed, and Tab makes no network requests.
+  All AWS service clients have been removed, and Tabulador makes no network requests.
 - Completion specs are built from [withfig/autocomplete](https://github.com/withfig/autocomplete)
   (MIT) at a pinned commit and bundled into the app, together with their icons.
 - macOS only. You build it yourself and sign it with a local certificate, so no Apple Developer
   account is needed.
 
-Tab is not affiliated with or endorsed by Amazon Web Services.
+Tabulador is not affiliated with or endorsed by Amazon Web Services.
 
 ## Requirements
 
@@ -32,15 +32,15 @@ Tab is not affiliated with or endorsed by Amazon Web Services.
   `make setup` skips anything already installed, so it is safe to re-run. `make check` shows
   what is still missing.
 
-Uninstall or disable Kiro CLI, Amazon Q or Fig first. Their shell hooks conflict with Tab's.
+Uninstall or disable Kiro CLI, Amazon Q or Fig first. Their shell hooks conflict with Tabulador's.
 
 ## Build and install
 
 ```sh
 make setup     # once: installs missing prerequisites
 make cert      # once: local code signing certificate
-make install   # checks prerequisites, builds and signs build/Tab.app, installs it to /Applications
-make run       # launches Tab
+make install   # checks prerequisites, builds and signs the app, installs it to /Applications
+make run       # launches Tabulador
 ```
 
 Run `make` on its own to list every target, such as `make check`, `make test` and
@@ -65,11 +65,11 @@ in `~/.local/bin`.
 
 Accessibility permission is tied to the app's signature. With the local certificate it
 carries over between rebuilds. Without it, the app is ad-hoc signed and you have to remove
-and re-add Tab under Accessibility after each rebuild.
+and re-add Tabulador under Accessibility after each rebuild.
 
 ## Usage
 
-Type a command and Tab suggests subcommands, options and arguments. Default keys:
+Type a command and Tabulador suggests subcommands, options and arguments. Default keys:
 
 | Key | Action |
 | --- | --- |
@@ -103,10 +103,10 @@ generated spec's first line says how.
 
 ### Troubleshooting
 
-- Run `tab doctor` in a new terminal window. It must run inside a Tab session, so it reports
+- Run `tab doctor` in a new terminal window. It must run inside a Tabulador session, so it reports
   that `tabterm` is not running in terminals opened before installing.
-- No popup: check that Tab is enabled under Accessibility. If it is listed but autocomplete
-  still doesn't work, remove it with **–** and add `/Applications/Tab.app` again.
+- No popup: check that Tabulador is enabled under Accessibility. If it is listed but autocomplete
+  still doesn't work, remove it with **–** and add `/Applications/Tabulador.app` again.
 - Logs are in `$TMPDIR/tablog` (for example `tab_desktop.log`).
 
 ## Uninstall
@@ -116,7 +116,7 @@ make uninstall                                         # runs tab uninstall
 security delete-identity -c "Tab Local Code Signing"   # optional: remove the signing certificate
 ```
 
-`tab uninstall` removes the app, the shell integrations, the input method and Tab's data in
+`tab uninstall` removes the app, the shell integrations, the input method and Tabulador's data in
 `~/Library/Application Support/tab`.
 
 ## Development

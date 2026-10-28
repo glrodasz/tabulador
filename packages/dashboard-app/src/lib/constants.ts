@@ -1,5 +1,5 @@
 // These should match the rust constants in tab_util::consts
-export const PRODUCT_NAME = "Tab";
+export const PRODUCT_NAME = "Tabulador";
 export const CLI_BINARY_NAME = "tab";
 
 export const USER_MANUAL_URL =

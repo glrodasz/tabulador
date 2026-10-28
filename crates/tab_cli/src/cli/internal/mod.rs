@@ -147,7 +147,7 @@ pub enum StateComponent {
 #[command(hide = true, alias = "_")]
 pub enum InternalSubcommand {
     /// Command that is run during the PreCmd section of
-    /// the Tab integrations.
+    /// the Tabulador integrations.
     PreCmd {
         #[arg(long, allow_hyphen_values = true)]
         alias: Option<String>,
@@ -156,9 +156,9 @@ pub enum InternalSubcommand {
     LocalState(local_state::LocalStateArgs),
     /// Callback used for the internal pseudoterminal
     Callback(CallbackArgs),
-    /// Install the Tab CLI
+    /// Install the Tabulador CLI
     Install(InstallArgs),
-    /// Uninstall the Tab CLI
+    /// Uninstall the Tabulador CLI
     Uninstall {
         /// Uninstall only the shell integrations
         #[arg(long)]

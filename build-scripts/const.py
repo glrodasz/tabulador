@@ -1,7 +1,7 @@
 import pathlib
 
 
-APP_NAME = "Tab"
+APP_NAME = "Tabulador"
 CLI_BINARY_NAME = "tab"
 CLI_BINARY_NAME_MINIMAL = "tab-minimal"
 PTY_BINARY_NAME = "tabterm"

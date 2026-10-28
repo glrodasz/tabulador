@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install (or reinstall) build/Tab.app into /Applications.
+# Install (or reinstall) build/Tabulador.app into /Applications.
 #
 # Replaces files instead of copying over them: macOS kills a signed binary
 # that was modified in place. Also refreshes the tabterm copies in
@@ -18,11 +18,15 @@ read -r app_name cli_name pty_name process_name < <(cd build-scripts && ../.venv
   'import const; print(const.APP_NAME, const.CLI_BINARY_NAME, const.PTY_BINARY_NAME, const.TAURI_PRODUCT_NAME)')
 src="build/${app_name}.app"
 dest="/Applications/${app_name}.app"
+# The app was called Tab.app before it was renamed to Tabulador
+legacy_dest="/Applications/Tab.app"
 
 [ -d "$src" ] || { echo "$src not found, run scripts/build-local.sh first" >&2; exit 1; }
 
 if pgrep -xq "$process_name"; then
-  "$dest/Contents/MacOS/$cli_name" quit || true
+  running="$dest"
+  [ -d "$running" ] || running="$legacy_dest"
+  "$running/Contents/MacOS/$cli_name" quit || true
   for _ in {1..20}; do
     pgrep -xq "$process_name" || break
     sleep 0.5
@@ -33,7 +37,7 @@ if pgrep -xq "$process_name"; then
   fi
 fi
 
-rm -rf "$dest"
+rm -rf "$dest" "$legacy_dest"
 cp -R "$src" "$dest"
 codesign --verify --deep --strict "$dest"
 
