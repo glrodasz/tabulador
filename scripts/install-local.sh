@@ -37,6 +37,10 @@ if pgrep -xq "$process_name"; then
   fi
 fi
 
+# The input method keeps running after the app quits. An old copy holds the
+# input method connection, so the new one can't take over until it exits.
+pkill -f "/Contents/Helpers/TabInputMethod.app/Contents/MacOS/tab_input_method" || true
+
 rm -rf "$dest" "$legacy_dest"
 cp -R "$src" "$dest"
 codesign --verify --deep --strict "$dest"
