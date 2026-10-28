@@ -303,9 +303,9 @@ _tab_link_send() {
   done
 }
 
-# Text the next line should start with (e.g. a shell started with initial text).
-# precmd cannot edit the line, so zle-line-init applies it.
-typeset -g _tab_link_start_text="" _tab_link_start_run=""
+# Set while tabterm's answer to `prompt` is unread. precmd cannot edit the
+# line, so zle-line-init reads the answer and applies it.
+typeset -g _tab_link_prompt_sent=""
 
 # Sends the exported environment and the aliases, each only when it changed
 # since it was last sent. Built in the shell, with no process or subshell.
@@ -336,31 +336,46 @@ _tab_link_send_context() {
   fi
 }
 
+# Does not wait for the answer, so the prompt shows at once: zle-line-init
+# reads it, once the prompt is drawn
 _tab_link_prompt() {
+  _tab_link_prompt_sent=""
   _tab_link_connect || return
   _tab_link_send_context
+  # Drop an answer no zle-line-init read (e.g. zle is off), or the next one
+  # would read it as its own
+  local reply
+  while read -r -u "$_tab_link_fd" -t 0 reply 2>/dev/null; do :; done
   _tab_link_escape "$PWD"
   _tab_link_send "prompt"$'\t'"$1"$'\t'"$REPLY" || return
   _tab_link_sent=""
-  # Ask the terminal to report focus changes while at the prompt, so switching
-  # tabs or windows can hide the popup
-  print -n $'\e[?1004h'
-  _tab_link_focus_on=1
-  local reply
-  IFS= read -r -u "$_tab_link_fd" -t 0.2 reply 2>/dev/null || return
-  _tab_link_parse_set "$reply" || return
-  _tab_link_start_text=$REPLY _tab_link_start_run=$_tab_link_set_execute
+  _tab_link_prompt_sent=1
 }
 
 _tab_link_line_init() {
-  [[ -n "$_tab_link_start_text" ]] || return
-  BUFFER=$_tab_link_start_text
-  CURSOR=${#BUFFER}
-  _tab_link_start_text=""
-  [[ "$_tab_link_start_run" == 1 ]] && zle accept-line
+  [[ -n "$_tab_link_fd" ]] || return
+  # Text the line should start with (e.g. a shell started with initial text).
+  # An answer that comes after the wait is dropped by the next key or prompt.
+  if [[ -n "$_tab_link_prompt_sent" ]]; then
+    _tab_link_prompt_sent=""
+    local reply
+    if IFS= read -r -u "$_tab_link_fd" -t 0.2 reply 2>/dev/null && _tab_link_parse_set "$reply"; then
+      BUFFER=$REPLY
+      CURSOR=${#BUFFER}
+      [[ "$_tab_link_set_execute" == 1 ]] && { zle accept-line; return; }
+    fi
+  fi
+  # Ask the terminal to report focus changes while at the prompt, so switching
+  # tabs or windows can hide the popup. Only once zle reads keys: the terminal
+  # answers with the focus state at once, and before zle the tty would echo it
+  # as ^[[I. The focus bindings take it here.
+  print -n $'\e[?1004h'
+  _tab_link_focus_on=1
 }
 
-# Stops focus reporting, so commands never see the focus sequences
+# Stops focus reporting, so commands never see the focus sequences. Runs when
+# zle finishes a line too, as ^C or an empty line runs no preexec, and precmd
+# could take long enough for a focus change to be echoed.
 _tab_link_focus_off() {
   [[ -n "$_tab_link_focus_on" ]] || return
   print -n $'\e[?1004l'
@@ -653,6 +668,7 @@ if _tab_link_active; then
   autoload -Uz add-zle-hook-widget
   add-zle-hook-widget line-pre-redraw _tab_link_report
   add-zle-hook-widget line-init _tab_link_line_init
+  add-zle-hook-widget line-finish _tab_link_focus_off
   # Its own hook: fig_preexec does nothing in no-PTY mode. add-zsh-hook adds
   # each hook once, so sourcing this file again adds no copy.
   autoload -Uz add-zsh-hook
