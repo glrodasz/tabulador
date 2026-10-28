@@ -36,28 +36,29 @@ Uninstall or disable Kiro CLI, Amazon Q or Fig first. Their shell hooks conflict
 ## Build and install
 
 ```sh
-scripts/setup.sh                # once: installs toolchains
-scripts/create-signing-cert.sh  # once: local code signing certificate
-scripts/build-local.sh          # builds and signs build/Tab.app
-scripts/install-local.sh        # installs to /Applications and launches it
+make setup     # once: installs toolchains
+make cert      # once: local code signing certificate
+make install   # checks prerequisites, builds and signs build/Tab.app, installs it to /Applications
+make run       # launches Tab
 ```
+
+Run `make` on its own to list every target, such as `make check`, `make test` and
+`make uninstall`. The `scripts/` they call still work on their own.
 
 On first launch, onboarding installs the shell integrations (a pre and post block in
 `~/.zshrc`, `~/.bashrc` and so on) and asks for **Accessibility** permission in
 System Settings → Privacy & Security → Accessibility. Then open a new terminal window.
 
-`build-local.sh` passes its arguments to the build script, for example
-`scripts/build-local.sh --skip-tests --skip-lints` for a faster rebuild.
+`make install FAST=1` skips tests and lints for a faster rebuild. `ARGS` passes anything else
+to the build script, for example `make build ARGS="--variant minimal"`.
 
 ### Updating
 
 ```sh
-git pull
-scripts/build-local.sh
-scripts/install-local.sh
+make update    # git pull, then make install run
 ```
 
-Use `install-local.sh` rather than copying the app over the installed one: macOS kills a
+Use `make install` rather than copying the app over the installed one: macOS kills a
 signed binary that is modified in place, and the script also refreshes the `tabterm` copies
 in `~/.local/bin`.
 
@@ -110,7 +111,7 @@ generated spec's first line says how.
 ## Uninstall
 
 ```sh
-tab uninstall
+make uninstall                                         # runs tab uninstall
 security delete-identity -c "Tab Local Code Signing"   # optional: remove the signing certificate
 ```
 
@@ -120,9 +121,8 @@ security delete-identity -c "Tab Local Code Signing"   # optional: remove the si
 ## Development
 
 ```sh
-cargo test --workspace
-cargo clippy --workspace --all-targets -- -D warnings
-pnpm install && pnpm test --run && pnpm lint
+make test   # cargo test --workspace, pnpm test --run
+make lint   # cargo clippy, pnpm lint
 ```
 
 Pre-commit hooks run rustfmt, clippy, prettier, ruff and typos on staged files. Three Rust

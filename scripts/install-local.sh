@@ -4,10 +4,15 @@
 # Replaces files instead of copying over them: macOS kills a signed binary
 # that was modified in place. Also refreshes the tabterm copies in
 # ~/.local/bin, which the app only updates when the version changes.
+#
+# Usage: scripts/install-local.sh [--no-open]
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+
+open_app=1
+[ "${1:-}" = --no-open ] && open_app=0
 
 read -r app_name cli_name pty_name process_name < <(cd build-scripts && ../.venv/bin/python -c \
   'import const; print(const.APP_NAME, const.CLI_BINARY_NAME, const.PTY_BINARY_NAME, const.TAURI_PRODUCT_NAME)')
@@ -38,5 +43,5 @@ for copy in "$HOME"/.local/bin/*" ($pty_name)"; do
   cp "$dest/Contents/MacOS/$pty_name" "$copy"
 done
 
-open "$dest"
+((open_app)) && open "$dest"
 echo "Installed $dest. Open a new terminal window to use it."
