@@ -2,6 +2,11 @@
   "name": "@tab/autocomplete-app",
   "private": true,
   "version": "1.0.0",
+  "author": "Guillermo Rodas",
+  "contributors": [
+    "Caleb Brown (https://github.com/kayluhb/tab)",
+    "Amazon Web Services (https://github.com/aws/amazon-q-developer-cli)"
+  ],
   "repository": "https://github.com/glrodasz/tabulador",
   "type": "module",
   "exports": {

@@ -5,7 +5,7 @@ use eyre::Context;
 use owo_colors::OwoColorize;
 use regex::Regex;
 use tab_util::CLI_BINARY_NAME;
-use tab_util::url::AUTOCOMPLETE_SSH_WIKI;
+use tab_util::branding::USER_MANUAL_SSH_URL;
 
 use crate::cli::doctor::{
     DoctorCheck,
@@ -46,7 +46,7 @@ impl DoctorCheck<()> for SshdConfigCheck {
             )
             .into(),
             "".into(),
-            format!("See {AUTOCOMPLETE_SSH_WIKI} for more info").into(),
+            format!("See {USER_MANUAL_SSH_URL} for more info").into(),
         ];
 
         let sshd_config_path = "/etc/ssh/sshd_config";
@@ -55,7 +55,7 @@ impl DoctorCheck<()> for SshdConfigCheck {
             Ok(config) => config,
             Err(_err) if tab_os_shim::Env::new().q_parent().is_ok() => {
                 return Err(DoctorError::warning(format!(
-                    "Could not read sshd_config, check {AUTOCOMPLETE_SSH_WIKI} for more info",
+                    "Could not read sshd_config, check {USER_MANUAL_SSH_URL} for more info",
                 )));
             },
             Err(err) => {

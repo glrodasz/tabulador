@@ -2,8 +2,9 @@
   "name": "@tab/proto",
   "version": "0.2.0",
   "license": "MIT OR Apache-2.0",
-  "author": "Caleb Brown",
+  "author": "Guillermo Rodas",
   "contributors": [
+    "Caleb Brown (https://github.com/kayluhb/tab)",
     "Amazon Web Services (https://github.com/aws/amazon-q-developer-cli)"
   ],
   "repository": "https://github.com/glrodasz/tabulador",

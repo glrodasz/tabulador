@@ -23,10 +23,10 @@ use nix::unistd::{
 };
 use tab_integrations::shell::ShellExt as _;
 use tab_os_shim::Env;
+use tab_util::branding::ISSUES_URL;
 use tab_util::directories::home_dir;
 use tab_util::{
     CLI_BINARY_NAME,
-    GITHUB_REPO_NAME,
     Shell,
 };
 use tracing::info;
@@ -76,7 +76,7 @@ pub fn fix_permissions(env: &Env) -> Result<()> {
             "The permissions have not been modified".bold()
         },
         format!("{CLI_BINARY_NAME} doctor").magenta(),
-        format!("https://github.com/{GITHUB_REPO_NAME}/issues").magenta(),
+        ISSUES_URL.magenta(),
     );
 
     Ok(())

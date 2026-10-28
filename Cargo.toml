@@ -13,9 +13,9 @@ default-members = ["crates/tab_cli"]
 
 [workspace.package]
 authors = [
-    "Amazon Q CLI Team (q-cli@amazon.com)",
-    "Chay Nabors (nabochay@amazon.com)",
-    "Brandon Kiser (bskiser@amazon.com)",
+    "Guillermo Rodas",
+    "Caleb Brown (https://github.com/kayluhb/tab)",
+    "Amazon Web Services (https://github.com/aws/amazon-q-developer-cli)",
 ]
 edition = "2024"
 homepage = "https://github.com/glrodasz/tabulador"

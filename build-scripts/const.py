@@ -1,7 +1,11 @@
+import json
 import pathlib
 
 
-APP_NAME = "Tabulador"
+# Product name and project links, shared with Rust, TypeScript and the Makefile
+BRANDING = json.loads((pathlib.Path(__file__).parent.parent / "branding.json").read_text())
+
+APP_NAME = BRANDING["productName"]
 CLI_BINARY_NAME = "tab"
 CLI_BINARY_NAME_MINIMAL = "tab-minimal"
 PTY_BINARY_NAME = "tabterm"

@@ -1,4 +1,5 @@
-APP_NAME    := Tabulador
+# Product name and links live in branding.json
+APP_NAME    := $(shell sed -n 's/.*"productName": *"\([^"]*\)".*/\1/p' branding.json)
 APP         := build/$(APP_NAME).app
 INSTALL_DIR := /Applications
 INSTALLED   := $(INSTALL_DIR)/$(APP_NAME).app
@@ -22,10 +23,10 @@ endif
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup cert check build install run update test lint clean distclean uninstall
+.PHONY: help setup cert check build install run update test lint branding clean distclean uninstall
 
 help: ## Show this help
-	@echo "Tabulador targets:"
+	@echo "$(APP_NAME) targets:"
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
 	@echo
 	@echo "First time:     make setup cert install run"
@@ -74,9 +75,13 @@ test: ## Run Rust and TypeScript tests
 	cargo test --workspace
 	pnpm install && pnpm test --run
 
-lint: ## Run clippy and the TypeScript linters
+lint: ## Run clippy, the TypeScript linters and the branding check
+	scripts/sync-branding.py --check
 	cargo clippy --workspace --all-targets -- -D warnings
 	pnpm lint
+
+branding: ## Copy author, credits and repository from branding.json into Cargo.toml and package.json files
+	scripts/sync-branding.py
 
 clean: ## Remove build/ (keeps the Cargo cache in target/)
 	rm -rf build

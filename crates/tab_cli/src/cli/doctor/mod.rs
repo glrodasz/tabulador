@@ -76,6 +76,7 @@ use tab_os_shim::{
 };
 use tab_proto::local::DiagnosticsResponse;
 use tab_settings::JsonStore;
+use tab_util::branding::ISSUES_URL;
 use tab_util::directories::{
     remote_socket_path,
     settings_path,
@@ -95,7 +96,6 @@ use tab_util::{
     APP_BUNDLE_NAME,
     CLI_BINARY_NAME,
     CLI_CRATE_NAME,
-    GITHUB_REPO_NAME,
     PRODUCT_NAME,
     PTY_BINARY_NAME,
     Shell,
@@ -1372,7 +1372,7 @@ impl DoctorCheck<SupportedTerminalCheckContext> for SupportedTerminalCheck {
                 Err(DoctorError::Error {
                     reason: format!(
                         "Unsupported terminal, if you believe this is a mistake or would like to see support for your terminal, open an issue at {}",
-                        format!("https://github.com/{GITHUB_REPO_NAME}/issues").magenta()
+                        ISSUES_URL.magenta()
                     ).into(),
                     info: vec![
                         format!(
@@ -2094,7 +2094,7 @@ pub async fn doctor_cli(all: bool, strict: bool) -> Result<ExitCode> {
         println!();
         println!(
             "If you are not sure how to fix it, please open an issue at {} to let us know!",
-            format!("https://github.com/{GITHUB_REPO_NAME}/issues").magenta()
+            ISSUES_URL.magenta()
         );
         println!();
     } else {
@@ -2105,7 +2105,7 @@ pub async fn doctor_cli(all: bool, strict: bool) -> Result<ExitCode> {
         println!();
         println!(
             "  {PRODUCT_NAME} still not working? Open an issue at {} to let us know!",
-            format!("https://github.com/{GITHUB_REPO_NAME}/issues").magenta()
+            ISSUES_URL.magenta()
         );
         println!();
     }
