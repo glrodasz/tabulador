@@ -30,7 +30,7 @@ install_macos_deps() {
     exit 1
   fi
   echo "Installing Homebrew packages..."
-  brew install pnpm protobuf zsh bash fish shellcheck jq
+  brew install pnpm protobuf zsh bash fish nushell shellcheck jq
   ((use_mise)) && brew install mise
   return 0
 }

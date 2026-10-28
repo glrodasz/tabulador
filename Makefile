@@ -3,6 +3,8 @@ APP         := build/$(APP_NAME).app
 INSTALL_DIR := /Applications
 INSTALLED   := $(INSTALL_DIR)/$(APP_NAME).app
 CLI         := $(INSTALLED)/Contents/MacOS/tab
+# Tabulador was installed as Tab.app before the rename
+LEGACY_CLI  := $(INSTALL_DIR)/Tab.app/Contents/MacOS/tab
 CERT_NAME   := Tab Local Code Signing
 TOOLS       := cargo rustup node pnpm protoc cargo-tauri python3.11
 
@@ -83,6 +85,8 @@ distclean: clean ## Also remove target/, .venv and node_modules
 	rm -rf target .venv node_modules
 
 uninstall: ## Remove the app, shell integrations and Tabulador data
-	@[ -x "$(CLI)" ] || { echo "$(INSTALLED) is not installed" >&2; exit 1; }
-	"$(CLI)" uninstall
+	@cli="$(CLI)"; \
+	[ -x "$$cli" ] || cli="$(LEGACY_CLI)"; \
+	[ -x "$$cli" ] || { echo "$(INSTALLED) is not installed" >&2; exit 1; }; \
+	"$$cli" uninstall
 	@echo "Optional: security delete-identity -c \"$(CERT_NAME)\""
