@@ -35,13 +35,13 @@ use tab_ipc::local::{
     toggle_debug_mode,
 };
 use tab_os_shim::Env;
+use tab_util::branding::ISSUES_URL;
 use tab_util::consts::APP_BUNDLE_ID;
 use tab_util::env_var::TAB_DEBUG_SHELL;
 use tab_util::macos::BUNDLE_CONTENTS_MACOS_PATH;
 use tab_util::{
     APP_BUNDLE_NAME,
     CLI_BINARY_NAME,
-    GITHUB_REPO_NAME,
     PRODUCT_NAME,
     PTY_BINARY_NAME,
     Shell,
@@ -473,10 +473,7 @@ impl DebugSubcommand {
                 }
                 println!("\n\n\n-------\nFinished writing to {}", outfile.display());
                 println!("Please send this file to the development team");
-                println!(
-                    "Or attach it to a GitHub issue: {}",
-                    format!("https://github.com/{GITHUB_REPO_NAME}/issues").magenta()
-                );
+                println!("Or attach it to a GitHub issue: {}", ISSUES_URL.magenta());
             },
             DebugSubcommand::VerifyCodesign => {
                 Command::new("codesign")

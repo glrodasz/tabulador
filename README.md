@@ -74,12 +74,24 @@ Run `make` to list them all.
 | `make run` | Launch the installed app |
 | `make update` | `git pull`, then install and relaunch |
 | `make test` / `make lint` | Rust and TypeScript tests / clippy and linters |
+| `make branding` | Copy author, credits and repository from `branding.json` into the manifests |
 | `make clean` / `make distclean` | Remove `build/` / also `target/`, `.venv` and `node_modules` |
 | `make uninstall` | Remove the app, shell integrations and Tabulador's data |
 
 `FAST=1` skips tests and lints on `build` and `install`. `ARGS` passes anything else to the
 build script, for example `make build ARGS="--variant minimal"`. The `scripts/` that the
 targets call also work on their own.
+
+### Branding
+
+`branding.json` holds the product name, author, credits and project links (repository, issues,
+user manual, completion specs and themes repos). Rust (`tab_util::branding`), the dashboard and
+autocomplete apps, the build scripts and the Makefile all read it. `Cargo.toml` and the
+`package.json` files can't, so `make branding` copies the author, credits and repository into
+them and `make lint` (and CI) fails if they drift. Markdown docs still link to the repo directly.
+
+The CLI name `tab`, the bundle IDs `com.kayluhb.*` and the data directories are not branding
+and stay where they are: changing them resets settings and the Accessibility grant.
 
 ### Updating
 

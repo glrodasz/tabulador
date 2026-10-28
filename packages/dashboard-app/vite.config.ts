@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { htmlBrandingPlugin } from "@tab/vite-config/branding";
 import { htmlCspPlugin } from "@tab/vite-config/csp";
 
 const csp: Record<string, string> = {
@@ -15,7 +16,7 @@ const csp: Record<string, string> = {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-  plugins: [react(), htmlCspPlugin(csp)],
+  plugins: [react(), htmlBrandingPlugin(), htmlCspPlugin(csp)],
   server: {
     port: 3433,
   },

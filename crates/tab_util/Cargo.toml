@@ -45,6 +45,9 @@ objc2-foundation = { workspace = true, features = ["NSURL"] }
 [target.'cfg(unix)'.dependencies]
 sysinfo.workspace = true
 
+[build-dependencies]
+serde_json.workspace = true
+
 [dev-dependencies]
 insta.workspace = true
 uuid.workspace = true

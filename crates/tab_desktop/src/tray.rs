@@ -12,8 +12,8 @@ use muda::{
 use tab_install::InstallComponents;
 use tab_os_shim::Context;
 use tab_remote_ipc::figterm::FigtermState;
+use tab_util::branding::USER_MANUAL_URL;
 use tab_util::consts::PRODUCT_NAME;
-use tab_util::url::USER_MANUAL;
 use tao::event_loop::ControlFlow;
 use tracing::{
     error,
@@ -120,7 +120,7 @@ pub fn handle_event(menu_event: &MenuEvent, proxy: &EventLoopProxy) {
             });
         },
         "user-manual" => {
-            if let Err(err) = tab_util::open_url(USER_MANUAL) {
+            if let Err(err) = tab_util::open_url(USER_MANUAL_URL) {
                 error!(%err, "Failed to open user manual url");
             }
         },

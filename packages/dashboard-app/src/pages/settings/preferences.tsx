@@ -2,6 +2,7 @@ import { UserPrefView } from "@/components/preference/list";
 import { Button } from "@/components/ui/button";
 import settings from "@/data/preferences";
 import { Native } from "@tab/api-bindings";
+import { PRODUCT_NAME } from "@/lib/constants";
 
 export default function Page() {
   return (
@@ -19,7 +20,7 @@ export default function Page() {
           className="px-0 text-blue-500 hover:underline decoration-1 underline-offset-1 hover:text-blue-800 hover:underline-offset-4 transition-all duration-100 text-sm"
           onClick={() => {
             Native.open(
-              "file:///Applications/Tabulador.app/Contents/Resources/dashboard/license/NOTICE.txt",
+              `file:///Applications/${PRODUCT_NAME}.app/Contents/Resources/dashboard/license/NOTICE.txt`,
             );
           }}
         >

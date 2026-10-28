@@ -1,5 +1,4 @@
 pub const APP_BUNDLE_ID: &str = "com.kayluhb.tab";
-pub const APP_BUNDLE_NAME: &str = "Tabulador.app";
 
 pub const APP_PROCESS_NAME: &str = "tab_desktop";
 
@@ -14,8 +13,6 @@ pub const CLI_CRATE_NAME: &str = "tab_cli";
 
 pub const URL_SCHEMA: &str = "tab";
 
-pub const PRODUCT_NAME: &str = "Tabulador";
-
 pub const RUNTIME_DIR_NAME: &str = "tabrun";
 
 /// Data directory name used in paths like ~/.local/share/{DATA_DIR_NAME}
@@ -24,12 +21,15 @@ pub const DATA_DIR_NAME: &str = "tab";
 /// Backup directory name
 pub const BACKUP_DIR_NAME: &str = ".tab.dotfiles.bak";
 
-pub const GITHUB_REPO_NAME: &str = "glrodasz/tabulador";
-
-pub mod url {
-    pub const USER_MANUAL: &str = "https://github.com/glrodasz/tabulador/blob/main/docs/user-manual.md";
-    pub const AUTOCOMPLETE_SSH_WIKI: &str = "https://github.com/glrodasz/tabulador/blob/main/docs/user-manual.md#ssh";
+/// Product name and project links, generated from `branding.json` at the repo root
+pub mod branding {
+    include!(concat!(env!("OUT_DIR"), "/branding.rs"));
 }
+
+pub use branding::{
+    APP_BUNDLE_NAME,
+    PRODUCT_NAME,
+};
 
 /// Build time env vars
 pub mod build {

@@ -1,10 +1,10 @@
-// These should match the rust constants in tab_util::consts
-export const PRODUCT_NAME = "Tabulador";
+import branding from "../../../../branding.json";
+
+// Product name and links come from branding.json, like tab_util::branding in Rust
+export const PRODUCT_NAME = branding.productName;
 export const CLI_BINARY_NAME = "tab";
 
-export const USER_MANUAL_URL =
-  "https://github.com/glrodasz/tabulador/blob/main/docs/user-manual.md";
-export const AUTOCOMPLETE_WIKI_URL =
-  "https://github.com/glrodasz/tabulador/blob/main/docs/user-manual.md#using-autocomplete";
+export const USER_MANUAL_URL = branding.links.userManual;
+export const AUTOCOMPLETE_WIKI_URL = branding.links.userManualAutocomplete;
 
 export const NOTIFICATIONS_SEEN_STATE_KEY = "dashboard.notificationsSeen";

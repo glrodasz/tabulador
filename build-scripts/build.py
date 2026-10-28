@@ -28,6 +28,7 @@ from signing import (
 from importlib import import_module
 from const import (
     APP_NAME,
+    BRANDING,
     CLI_BINARY_NAME,
     CLI_PACKAGE_NAME,
     DESKTOP_PACKAGE_NAME,
@@ -45,13 +46,13 @@ BUILD_DIR = BUILD_DIR_RELATIVE.absolute()
 
 
 # Completion specs, built from source and bundled into the app
-SPECS_REPO = "https://github.com/glrodasz/tab-autocomplete.git"
+SPECS_REPO = BRANDING["specsRepository"]
 SPECS_COMMIT = "aef52acff84c45edde61ae610cc2c964802b9a38"
 # Our own specs, laid out like upstream's src/; they add to or replace upstream specs
 SPECS_OVERRIDES_PATH = pathlib.Path("specs")
 
 # Themes, bundled into the app
-THEMES_REPO = "https://github.com/glrodasz/tab-themes.git"
+THEMES_REPO = BRANDING["themesRepository"]
 THEMES_COMMIT = "ab71dc82974f4750736d2583867bf6c7219515cb"
 
 
