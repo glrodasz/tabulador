@@ -23,8 +23,10 @@ Tab is not affiliated with or endorsed by Amazon Web Services.
   - Xcode command line tools
   - rustup, the pinned toolchain from `rust-toolchain.toml` (Rust 1.88) and `nightly-2025-11-01`
     for formatting
-  - Node 22 and Python 3.11 with [mise](https://mise.jdx.dev), plus pnpm and protobuf. If you
-    use pyenv, Python comes from it instead, pinned by `.python-version`
+  - Node 22 and Python 3.11, pinned in `.nvmrc` and `.python-version`. They come from nvm and
+    pyenv when you have them, otherwise from [mise](https://mise.jdx.dev). Node builds the
+    autocomplete and dashboard UIs and the completion specs
+  - pnpm and protobuf
   - The Tauri 1 CLI, built with Rust 1.79
 
   `make setup` skips anything already installed, so it is safe to re-run. `make check` shows
