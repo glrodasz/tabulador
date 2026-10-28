@@ -1,5 +1,5 @@
 pub const APP_BUNDLE_ID: &str = "com.kayluhb.tab";
-pub const APP_BUNDLE_NAME: &str = "Tab.app";
+pub const APP_BUNDLE_NAME: &str = "Tabulador.app";
 
 pub const APP_PROCESS_NAME: &str = "tab_desktop";
 
@@ -14,7 +14,7 @@ pub const CLI_CRATE_NAME: &str = "tab_cli";
 
 pub const URL_SCHEMA: &str = "tab";
 
-pub const PRODUCT_NAME: &str = "Tab";
+pub const PRODUCT_NAME: &str = "Tabulador";
 
 pub const RUNTIME_DIR_NAME: &str = "tabrun";
 

@@ -99,7 +99,7 @@ pub enum Processes {
     App,
 }
 
-/// The Tab CLI
+/// The Tabulador CLI
 #[deny(missing_docs)]
 #[derive(Debug, PartialEq, Subcommand)]
 pub enum CliRootCommands {
@@ -115,7 +115,7 @@ pub enum CliRootCommands {
     /// Setup cli components
     #[command(alias("install"))]
     Setup(internal::InstallArgs),
-    /// Uninstall Tab
+    /// Uninstall Tabulador
     #[command(hide = true)]
     Uninstall {
         /// Force uninstall
@@ -164,7 +164,7 @@ pub enum CliRootCommands {
 
 const HELP_TEXT: &str = color_print::cstr! {"
 
-<magenta,em>tab</magenta,em> (Tab CLI)
+<magenta,em>tab</magenta,em> (Tabulador CLI)
 
 <magenta,em>Popular Subcommands</magenta,em>            <black!><em>Usage:</em> tab [subcommand]</black!>
 ╭────────────────────────────────────────────────────╮

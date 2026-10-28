@@ -109,7 +109,7 @@ use crate::{
 pub const DASHBOARD_SIZE: LogicalSize<f64> = LogicalSize::new(960.0, 720.0);
 pub const DASHBOARD_MINIMUM_SIZE: LogicalSize<f64> = LogicalSize::new(700.0, 480.0);
 
-pub const AUTOCOMPLETE_WINDOW_TITLE: &str = "Fig Autocomplete";
+pub const AUTOCOMPLETE_WINDOW_TITLE: &str = "Tabulador Autocomplete";
 
 pub const LOGIN_PATH: &str = "/";
 

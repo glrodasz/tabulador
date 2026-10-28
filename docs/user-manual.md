@@ -1,7 +1,7 @@
-# Tab user manual
+# Tabulador user manual
 
-Tab adds IDE-style autocomplete to your existing macOS terminal. It runs fully offline. To build
-and install it, see the [README](../README.md#build-and-install).
+Tabulador adds IDE-style autocomplete to your existing macOS terminal. It runs fully offline. To
+build and install it, see the [README](../README.md#build-and-install).
 
 ## Setting up
 
@@ -11,12 +11,12 @@ On first launch, onboarding does two things:
 2. It asks for **Accessibility** permission in System Settings → Privacy & Security →
    Accessibility.
 
-Then open a new terminal window. Terminal windows that were open before you installed Tab do not
-get autocomplete.
+Then open a new terminal window. Terminal windows that were open before you installed Tabulador do
+not get autocomplete.
 
 ## Using autocomplete
 
-Type a command and Tab suggests subcommands, options and arguments. The default keys are:
+Type a command and Tabulador suggests subcommands, options and arguments. The default keys are:
 
 | Key    | Action                         |
 | ------ | ------------------------------ |
@@ -32,21 +32,21 @@ To turn autocomplete off everywhere, run `tab settings autocomplete.disable true
 
 ## Terminals
 
-Tab works in Terminal.app, iTerm 2, Hyper and the VS Code terminal. Each one has a card in
+Tabulador works in Terminal.app, iTerm 2, Hyper and the VS Code terminal. Each one has a card in
 `tab dashboard` under Integrations.
 
-A card's **Enabled** label means only that you have not turned Tab off for that terminal. It does
-not check that the terminal is set up. For the popup to appear, all of these must also be true:
+A card's **Enabled** label means only that you have not turned Tabulador off for that terminal. It
+does not check that the terminal is set up. For the popup to appear, all of these must also be true:
 
-- Tab has Accessibility permission.
+- Tabulador has Accessibility permission.
 - Autocomplete is not turned off with `autocomplete.disable`.
 - For terminals that need the input method, the input method is installed and enabled. See
   below.
 
 ### Input method
 
-Some terminals do not expose the cursor position through Accessibility, so Tab reads it with an
-input method instead. These are Alacritty, Kitty, WezTerm, Ghostty, Zed, Rio, Nova and the
+Some terminals do not expose the cursor position through Accessibility, so Tabulador reads it with
+an input method instead. These are Alacritty, Kitty, WezTerm, Ghostty, Zed, Rio, Nova and the
 JetBrains IDEs.
 
 ```sh
@@ -56,7 +56,7 @@ tab integrations status input-method
 
 ### VS Code
 
-Tab installs a small extension into VS Code, VS Code Insiders and VSCodium.
+Tabulador installs a small extension into VS Code, VS Code Insiders and VSCodium.
 
 ```sh
 tab integrations install vscode
@@ -66,10 +66,10 @@ tab integrations status vscode
 ## SSH
 
 The SSH integration adds an `Include` block to the bottom of `~/.ssh/config`. When you connect to
-a host, Tab forwards a socket to it so that autocomplete can work in the remote shell.
+a host, Tabulador forwards a socket to it so that autocomplete can work in the remote shell.
 
-The remote host must also run Tab's shell integrations. Tab builds for macOS only, so in practice
-the remote host must be a Mac with Tab installed.
+The remote host must also run Tabulador's shell integrations. Tabulador builds for macOS only, so in
+practice the remote host must be a Mac with Tabulador installed.
 
 To set it up:
 
@@ -103,10 +103,11 @@ files.
 
 ## Troubleshooting
 
-- Run `tab doctor` in a new terminal window. It must run inside a Tab session. In a terminal that
-  was open before you installed Tab, it reports that `tabterm` is not running.
-- No popup: check that Tab is turned on under Accessibility. If Tab is listed but autocomplete
-  still does not work, remove it with **–** and add `/Applications/Tab.app` again.
+- Run `tab doctor` in a new terminal window. It must run inside a Tabulador session. In a terminal
+  that was open before you installed Tabulador, it reports that `tabterm` is not running.
+- No popup: check that Tabulador is turned on under Accessibility. If Tabulador is listed but
+  autocomplete still does not work, remove it with **–** and add `/Applications/Tabulador.app`
+  again.
 - Logs are in `$TMPDIR/tablog`, for example `tab_desktop.log`.
 - To report a bug, open an issue at
   [github.com/kayluhb/tab/issues](https://github.com/kayluhb/tab/issues).
@@ -117,5 +118,5 @@ files.
 tab uninstall
 ```
 
-This removes the app, the shell integrations, the input method and Tab's data in
+This removes the app, the shell integrations, the input method and Tabulador's data in
 `~/Library/Application Support/tab`.

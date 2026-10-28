@@ -519,7 +519,7 @@ mod tests {
 
     #[test]
     fn snapshot_themes_dir() {
-        macos!(themes_dir(&Context::new()), @"/Applications/Tab.app/Contents/Resources/themes");
+        macos!(themes_dir(&Context::new()), @"/Applications/Tabulador.app/Contents/Resources/themes");
     }
 
     #[test]

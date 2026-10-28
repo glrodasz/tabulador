@@ -746,7 +746,7 @@ mod tests {
     use super::*;
 
     const TEST_INPUT_METHOD_BUNDLE_ID: &str = "com.kayluhb.inputmethod.tab";
-    const TEST_INPUT_METHOD_BUNDLE_URL: &str = "/Applications/Tab.app/Contents/Helpers/TabInputMethod.app";
+    const TEST_INPUT_METHOD_BUNDLE_URL: &str = "/Applications/Tabulador.app/Contents/Helpers/TabInputMethod.app";
 
     fn input_method() -> TISInputSource {
         let key: CFString = unsafe { CFString::wrap_under_create_rule(kTISPropertyBundleID) };
