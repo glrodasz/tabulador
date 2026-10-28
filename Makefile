@@ -7,7 +7,8 @@ CERT_NAME   := Tab Local Code Signing
 TOOLS       := cargo rustup pnpm protoc cargo-tauri python3.11
 
 # Find tools that make setup just installed, before the shell config is reloaded
-export PATH := $(HOME)/.cargo/bin:$(HOME)/.local/share/mise/shims:$(PATH)
+PYENV_ROOT  ?= $(HOME)/.pyenv
+export PATH := $(HOME)/.cargo/bin:$(PYENV_ROOT)/shims:$(HOME)/.local/share/mise/shims:$(PATH)
 
 # make build FAST=1 skips tests and lints; ARGS passes anything else to build-scripts/main.py
 ARGS ?=

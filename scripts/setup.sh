@@ -12,7 +12,7 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
 fi
 
 # Tools installed below are not on PATH until a new shell starts
-export PATH="$HOME/.cargo/bin:$HOME/.local/share/mise/shims:$PATH"
+export PATH="$HOME/.cargo/bin:${PYENV_ROOT:-$HOME/.pyenv}/shims:$HOME/.local/share/mise/shims:$PATH"
 
 install_macos_deps() {
   xcode-select -p >/dev/null 2>&1 || xcode-select --install || true
@@ -71,9 +71,17 @@ add_to_shell() {
 }
 
 setup_mise() {
-  echo "Installing Python and Node with mise..."
   mise trust
-  mise install
+  # pyenv users get Python from .python-version; mise then only provides Node
+  if command -v pyenv >/dev/null 2>&1; then
+    echo "Installing Python $(cat .python-version) with pyenv and Node with mise..."
+    pyenv install --skip-existing "$(cat .python-version)"
+    pyenv rehash
+    mise install node
+  else
+    echo "Installing Python and Node with mise..."
+    mise install
+  fi
   mise reshim
 }
 
