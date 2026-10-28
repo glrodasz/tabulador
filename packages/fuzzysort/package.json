@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "Amazon Web Services",
-  "repository": "https://github.com/kayluhb/tab",
+  "repository": "https://github.com/glrodasz/tabulador",
   "type": "module",
   "exports": "./fuzzysort.js",
   "types": "./fuzzysort.d.ts",

@@ -110,7 +110,7 @@ files.
   again.
 - Logs are in `$TMPDIR/tablog`, for example `tab_desktop.log`.
 - To report a bug, open an issue at
-  [github.com/kayluhb/tab/issues](https://github.com/kayluhb/tab/issues).
+  [github.com/glrodasz/tabulador/issues](https://github.com/glrodasz/tabulador/issues).
 
 ## Uninstalling
 
