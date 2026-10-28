@@ -22,6 +22,8 @@ export type Pref = {
     image: string;
   };
   priority?: number;
+  /** An integration that only works once this component is installed */
+  installKey?: InstallKey;
 };
 
 export type Action = {

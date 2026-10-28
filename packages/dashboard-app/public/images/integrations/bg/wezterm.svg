@@ -1,0 +1,9 @@
+<svg viewBox="0 0 240 127" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0H240V79L0 127V0Z" fill="url(#paint0_linear_wezterm)"/>
+<defs>
+<linearGradient id="paint0_linear_wezterm" x1="0" y1="60" x2="240" y2="60" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1E2330"/>
+<stop offset="1" stop-color="#4E49EE"/>
+</linearGradient>
+</defs>
+</svg>
