@@ -249,6 +249,7 @@ async fn shell_init(shell: &Shell, when: &When, rcfile: &Option<String>) -> Resu
     }
 
     if when == &When::Post
+        && !*IS_SNAPSHOT_TEST
         && !tab_integrations::input_method::InputMethod::default()
             .is_enabled()
             .unwrap_or(false)
