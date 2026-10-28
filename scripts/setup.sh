@@ -35,7 +35,8 @@ install_rust() {
   # Pinned: newer nightlies reformat the existing code
   rustup toolchain install nightly-2025-11-01 --component rustfmt
   rustup target add x86_64-apple-darwin aarch64-apple-darwin
-  command -v typos >/dev/null 2>&1 || cargo install typos-cli
+  # rust-toolchain.toml pins an older Rust than recent typos-cli releases require
+  command -v typos >/dev/null 2>&1 || cargo +stable install typos-cli
 
   # Tauri 1 CLI needs an older Rust to build
   if ! command -v cargo-tauri >/dev/null 2>&1; then
