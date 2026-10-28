@@ -7,7 +7,7 @@
   "contributors": [
     "Amazon Web Services (https://github.com/aws/amazon-q-developer-cli)"
   ],
-  "repository": "https://github.com/kayluhb/tab",
+  "repository": "https://github.com/glrodasz/tabulador",
   "type": "module",
   "exports": {
     "./*": "./dist/*.config.js"

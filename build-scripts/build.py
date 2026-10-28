@@ -45,13 +45,13 @@ BUILD_DIR = BUILD_DIR_RELATIVE.absolute()
 
 
 # Completion specs, built from source and bundled into the app
-SPECS_REPO = "https://github.com/kayluhb/tab-autocomplete.git"
+SPECS_REPO = "https://github.com/glrodasz/tab-autocomplete.git"
 SPECS_COMMIT = "aef52acff84c45edde61ae610cc2c964802b9a38"
 # Our own specs, laid out like upstream's src/; they add to or replace upstream specs
 SPECS_OVERRIDES_PATH = pathlib.Path("specs")
 
 # Themes, bundled into the app
-THEMES_REPO = "https://github.com/kayluhb/tab-themes.git"
+THEMES_REPO = "https://github.com/glrodasz/tab-themes.git"
 THEMES_COMMIT = "ab71dc82974f4750736d2583867bf6c7219515cb"
 
 

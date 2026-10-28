@@ -24,11 +24,11 @@ pub const DATA_DIR_NAME: &str = "tab";
 /// Backup directory name
 pub const BACKUP_DIR_NAME: &str = ".tab.dotfiles.bak";
 
-pub const GITHUB_REPO_NAME: &str = "kayluhb/tab";
+pub const GITHUB_REPO_NAME: &str = "glrodasz/tabulador";
 
 pub mod url {
-    pub const USER_MANUAL: &str = "https://github.com/kayluhb/tab/blob/main/docs/user-manual.md";
-    pub const AUTOCOMPLETE_SSH_WIKI: &str = "https://github.com/kayluhb/tab/blob/main/docs/user-manual.md#ssh";
+    pub const USER_MANUAL: &str = "https://github.com/glrodasz/tabulador/blob/main/docs/user-manual.md";
+    pub const AUTOCOMPLETE_SSH_WIKI: &str = "https://github.com/glrodasz/tabulador/blob/main/docs/user-manual.md#ssh";
 }
 
 /// Build time env vars
