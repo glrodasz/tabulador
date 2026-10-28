@@ -4,11 +4,13 @@ INSTALL_DIR := /Applications
 INSTALLED   := $(INSTALL_DIR)/$(APP_NAME).app
 CLI         := $(INSTALLED)/Contents/MacOS/tab
 CERT_NAME   := Tab Local Code Signing
-TOOLS       := cargo rustup pnpm protoc cargo-tauri python3.11
+TOOLS       := cargo rustup node pnpm protoc cargo-tauri python3.11
 
 # Find tools that make setup just installed, before the shell config is reloaded
 PYENV_ROOT  ?= $(HOME)/.pyenv
-export PATH := $(HOME)/.cargo/bin:$(PYENV_ROOT)/shims:$(HOME)/.local/share/mise/shims:$(PATH)
+NVM_DIR     ?= $(HOME)/.nvm
+NVM_NODE    := $(lastword $(sort $(wildcard $(NVM_DIR)/versions/node/v$(shell cat .nvmrc).*/bin)))
+export PATH := $(HOME)/.cargo/bin:$(if $(NVM_NODE),$(NVM_NODE):)$(PYENV_ROOT)/shims:$(HOME)/.local/share/mise/shims:$(PATH)
 
 # make build FAST=1 skips tests and lints; ARGS passes anything else to build-scripts/main.py
 ARGS ?=
@@ -39,6 +41,9 @@ check: ## Check prerequisites, signing certificate and conflicting apps
 		if command -v $$tool >/dev/null 2>&1; then echo "  ok       $$tool"; \
 		else echo "  missing  $$tool"; ok=0; fi; \
 	done; \
+	node_major=$$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null); \
+	if [ -n "$$node_major" ] && [ "$$node_major" != "$$(cat .nvmrc)" ]; then \
+		echo "  wrong    node $$node_major (need $$(cat .nvmrc), see .nvmrc)"; ok=0; fi; \
 	if security find-identity -p codesigning 2>/dev/null | grep -qF '"$(CERT_NAME)"'; then \
 		echo "  ok       signing certificate"; \
 	else echo "  missing  signing certificate (optional: make cert)"; fi; \
